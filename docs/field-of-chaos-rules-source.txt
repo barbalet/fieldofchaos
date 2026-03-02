@@ -1,0 +1,512 @@
+===== PAGE 10 =====
+Role Playing Game
+(Single Dice Wound Roll + Yards Rather than Inches)
+The Field of Chaos game is a narrative driven role playing game. There are two primary roles in the game. The role of
+the Controller who directs the game with narration and adjudication and the role of the Player who acts out a
+Character in the game. There can be only one Controller in a game. There can be any number of Players from one to
+potentially as many as ten. The distinction between a Player and a Character is that the Player plays the Character in
+the game. When a Character is described in this writing it refers to the in-game entity. When a Player is described it
+represents the person playing the game.
+In addition to this document, you will need at least five six-sided dice. The six sided dice is the regular dice you
+would find in a variety of board games and it should be easy purchased or found through other games that use dice.
+You will also need paper and pencils or pens. It is important to keep a written record of various parts of the game. If
+you are a Player, you will need to keep a record of your Character. Similarly, if you are the Controller, you will keep
+records on Characters as well but also notes on the game and potentially additional Characters that aren't played by
+Players but are played by the Controller.
+House Rules
+The rules provided here are designed to give a guide to play. It must be acknowledged here explicitly that these may
+not be the only rules that are needed for the game, or that a Controller or Players may want to play a game. House
+rules (that is rules created separate from the rules presented here) are not only permitted by this game, they are
+actively encouraged.
+If a Controller or potentially even Players find particular rules are not working for them in their frequent play of this
+game, please add or changes the rules accordingly. The only formal requirement for house rules is that they are written
+down in some form (either paper or electronic) and that all participants in the game agree to the House Rules prior to
+the game beginning.
+Narrative
+Consider the purpose of the experience of playing Field of Chaos to explore a rich universe and develop your
+character (or your players) through this experience. Rather than creating life and death circumstances at every turn of
+the game, consider the development of scenarios in the game as being a means of choosing distinct character paths
+and also exploring the particularly twisted and complex universe.
+There are, however, a wide variety of conditions other than death that can end the game. The loss of a character's
+physical and/or mental mobility may cause the game to end. Capture and/or imprisonment may leave the character in
+an immobile state. Although either case could also be used as the starting point of another scenario.
+Consider the narrative flow the most important element of the game. At the time of writing there is only one work
+available to review the style of narrative used in Field of Chaos however this rule book will also provide a number of
+techniques and background examples to assist with creating a detailed narrative both as a Player and a Controller.
+Disputes
+Through the course of a game, as there are many points of tension that could result in disputes between Players or
+disputes between Players and the Controller. All disputes must be resolved with a dice roll. In the case where a
+particular rule is in question, if the rule can not be found within about two minutes, this dispute must be resolved with
+a dice roll. The purpose of the game is to have fun and explore an alternative world. Hostility generated through
+disputes spoil the game for all concerned.
+In the case of a dispute between two players, one participant picks odd, the other picks even. A dice is rolled and
+based on whether the roll is odd or even the participant who nominated the outcome rule has their decision met.
+In the case of a dispute with three participants, each participant nominates a number 1, 2 or 3. The dice is rolled and in
+the case of a 1 or a 4, the participant who picked 1 has their decision met. In the case of a 2 or a 5, the participant who
+picked 2 has their decision met. In the remaining outcomes, the participant who picked 3 has their decision met.
+If there are more than three participants in dispute, some of the participants need to come to agreement resolving
+65
+down to two or three groups so the dice can be rolled. An alternative solution has the participants taking a vote to see
+which two or three possibilities are the most reasonable to roll on.
+Statistics
+
+===== PAGE 11 =====
+There are five numerical statistics in the game. These are:
+Regular Intelligence (RE)
+Irregular Intelligence (IR)
+Appearance (AP)
+Physical Health (PH)
+Mental Health (ME)
+Each of these skills have the value between 0 and 10 with the total of all five numerical skills not exceeding 30 initially. It should
+be possible to extend the character though detailed and focused play to move the maximum limit of these five values combined to
+40. This is the maximum possible for any character in the game. In general, a Controller may want to cap the total to something
+between 30 and 40 to avoid overly powerful characters.
+All other skills including weapons operation and any skills that will effect combat are awarded through skill paths. The concept of
+skill paths indicate that all skills will either be entry level skills or have prerequisite requirements. These skills are built up over
+time and through specific actions. All skills have to be learned in some way. The skills offered in this book are only a small part of
+the total skills available through the game. Through house rules and future book updates numerous other skills can be offered. For
+this reason the weighting on statistics linkings to skill are based on the skills available here.
+Regular Intelligence (RE) describes broadly the kind of intelligence that is academically represented. It is a statistic that lends
+itself to a wide variety of skills too. For this reason, a player may consider Regular Intelligence to be the most important statistic.
+This should be counteracted with the practical use of the skills gained through Regular Intelligence when compared to Physical
+Health or Mental Health.
+Irregular Intelligence (IR) is slightly more idiomatic than Regular Intelligence. It would be too easy to define it as everything
+relating to intelligence and knowledge not covered by Regular Intelligence however broadly this is what Irregular Intelligence
+describes. It may be easier to summarize that while Regular Intelligence is the ability to learn and use knowledge, Irregular
+Intelligence is the ability to understand things with limited experience and in a variety of different fields that would not normally be
+covered by Regular Intelligence.
+Appearance (AP) describes not only how a Character appears relative to a cross section of society, it also denotes a subtle class
+classification. Appearance governs not only the general upkeep of the Character but also the kind of clothing and physical attitude
+of the Character. It should be assumed that Appearance also has some age bias built into it. Generally a younger Character would
+have a lower Appearance as they are more heavily governed by their peer group and their own access to money and other direct
+indications of status. It is perfectly possible for adults to have low Appearance too. In some circumstances of relative wealth, young
+people may also have a higher Appearance than their peers. This is statistically unlikely but through the freedom of statistics a
+Player may wish to create a character like this.
+Physical Health (PH), as the name suggests, describes the general health of the Character. The higher the Physical Health,
+generally the better the Character can do strenuous activity. The lower the Physical Health, the less likely a Character is to do vast
+amounts of physical activity without a suitable penalty associated with rest or general inability to continue.
+Mental Health (ME) represents the character's mental state including conditions of fatigue. A low Mental Health does not
+characterize mental illness although a low Mental Health can make a Character more susceptible to mental illness.
+In this book, by far the majority of skills offered come through Regular Intelligence (RE). For this reason if Players want to take
+advantage just of skill maximization, they should maximize their RE. There are roughly equal numbers of skills for Irregular
+Intelligence (IR), Physical Health (PH) and Mental Health (ME). There are only a small number of skills for Appearance (AP)
+however appearance plays an important role in the game quite distinct from the other statistics. A Character's ability to move
+through an environment without attracting attention is based on their Appearance (AP) relative to the environment around them.
+This can be masked somewhat by skills like Disguise andcEvade however fundamentally if a Character does not have a reasonable
+Appearance, they will have problems moving through areas that require a high Appearance to fit in. Similarly if they maintain a
+high Appearance, the Character may have problems moving through an environment that has a low Appearance norm. This will be
+described in greater detail through the introductory scenarios offered in this book.
+Statistics Generation
+The mechanic for finding a Character's statistic is as follows:
+i. The Player rolls three dice. These three numbers are recorded.
+ii. The Player then can select any two of these dice for the results on the dice face. The dice can be turned to the
+face surface and these two numbers are recorded. (If you are good with mathematics, simply take seven and subtract
+the number on top for both dice individually as this produces the same result as rotating the two dice from their faces.)
+iii. The Player has five numbers written down. (x, y, z, 7-x, 7-y)
+iv. The Player then selects one of these five numbers and adds two to that number. The four remaining numbers
+66
+have one added per number. Again this is the Player's choice which number has two added to it.
+v. The Player can then pick which of these five values connect with the five statistics for their Character.
+Three Examples of Statistics Generation
+
+===== PAGE 12 =====
+i. ii. iii. iv. The player rolls three dice. These numbers are 3, 6 and 1.
+The player choses to turn the dice with 1 and the dice with 3 onto the facing side.
+This gives the results 6 and 4. The player now has five numbers 3, 6, 1, 4 and 6.
+The player nominates the 1 to have the plus 2 and the remaining rolls have plus 1, taking the five numbers:
+3 + 1 = 4
+6 + 1 = 7
+1 + 2 = 3
+4 + 1 = 5
+6 + 1 = 7
+v. The player wants a character who is street smart, and book smart with lower physical health and roughly
+average mental health. Thus the statistics are chosen as:
+RE IR AP PH ME
+7 7 3 4 5
+i. ii. iii. iv. v. Another player rolls three dice. These values are 2, 4 and 3.
+The player elects to turn the 2 and 3 dice to their opposite faces.
+This gives 5 and 4. This gives the player initially the numbers 2, 4, 3, 5 and 4.
+The player elects to put the plus two value on the 5 with the remaining values receiving the plus one.
+2 + 1 = 3
+4 + 1 = 5
+3 + 1 = 4
+5 + 2 = 7
+4 + 1 = 5
+The player wants to create a character with strong physical health and a reasonable appearance the remaining
+statistics are unimportant to the player.
+RE IR AP PH ME
+4 3 5 7 5
+i. ii. iii. iv. Another player rolls the three dice. These result in values 2, 6 and 5.
+The player opts to turn the 2 and 5 dice to their face values, 5 and 2 respectively.
+This gives five number 2, 6, 5, 5 and 2.
+The player opts to add the two to one of the 2 rolls giving:
+2 + 2 = 4
+6 + 1 = 7
+5 + 1 = 6
+5 + 1 = 6
+2 + 1 = 3
+v. The player doesn't have many options as this has produced an even weighted set of numbers. As the player
+does not know how the game will develop they allocate the statistics as follows:
+RE IR AP PH ME
+6 3 6 7 4
+This is a relatively average character with the ability to strengthen and weaken some of these values through a number
+of games.
+The rules associated with increasing and decreasing these values will be discussed in the Controller section of this
+book.
+Mathematically astute players will note a total statistics value range from 21 to 26 which is slightly under the
+average being at 25 and indicates a preference for lower results initially. This in part is true however the way the play
+themselves selects which two of the three dice are negated by the two dice totaling 7 spread, means this number is
+closer to the 25 average total. Also the player's statistics should initially be lower to allow for the additional increases
+67
+needed through the game and the accessibility of Anti-System groups to young players. This will be expanded further
+in the setting component adjacent to the basic rules.
+Skills
+
+===== PAGE 13 =====
+A player is allowed one skill per statistic point in each area. Prerequisites are noted and have to be covered by this
+skill accounting too. The skills in the game are based on the statistics and also the amount of time the skills are used.
+Each time a skill is used in the game a single dice should be rolled by the Player. Consult the Skill advancement table
+below and in the case where the roll is made successfully, advance the skill a single percentage point where
+applicable.
+d6 Roll to Advance 1% Current Skill Percent
+2 to 6 Less than 17%
+3 to 6 17% to 33%
+4 to 6 34% to 50%
+5 to 6 51% to 67%
+6 Greater than 67%
+The expanding of a skill into another skill (from Computer Programming to writing Anti-Viral Software) always
+requires additional work.
+Regular Intelligence
+Anti-Viral Software (requires Computer Programming)
+Artificial Intelligence (requires Computer Programming)
+Biology, Basic
+Botany (requires Basic Biology and Horticulture)
+Cartography (requires Basic Geography and Visual Art)
+Chemistry, Basic
+Chemistry, Advanced (requires Basic Chemistry)
+Chemistry, Pharmaceutical (requires Advanced Chemistry and Basic Biology)
+Computer Operation
+Computer Programming (requires Computer Operation)
+Computer Repair
+Cryptography (requires Advanced Mathematics)
+Copyediting (requires Primary Written Language)
+Drive Tracked Vehicle (requires Drive Car)
+Electronics, Basic
+Electronics Repair (requires Basic Electronics)
+Electronics Operation (requires Basic Electronics)
+First Aid
+Geography, Basic
+Gun-Smithing, Basic (Requires Advanced Firearm Use (any))
+History, Basic
+Horticulture
+Language Written, Primary (requires Primary Language Spoken)
+Language Written, Secondary (requires Secondary Language Spoken)
+68
+
+===== PAGE 14 =====
+Mathematics, Basic
+Mathematics, Advanced (requires Basic Mathematics)
+Mechanic, Auto Basic (requires Drive Car or Drive Motorcycle)
+Mechanic, Auto Advanced (requires Basic Auto Mechanic)
+Musical Performance
+Paramedic (requires First Aid)
+Psychology, Basic
+Zoology (requires Basic Biology)
+Irregular Intelligence
+Computer Virus Creation (requires Computer Programming)
+Explosive Engineering (requires Basic Chemistry)
+Forgery (requires Visual Art)
+Lock-picking
+Hacking (requires Computer Operation)
+Hunting
+Manufacture Clandestine Weapon (requires Carpentry)
+Track (requires Disguise)
+Improvised Weapon Use, Basic
+Clandestine Weapon Use, Basic
+Wilderness Survival, Advanced (requires Basic Wilderness Survival)
+Appearance
+Disguise
+Evade
+Etiquette (requires Basic Manners)
+Orate (requires Primary Spoken Language)
+Scouting (requires Basic Geography and Advanced Wilderness Survival)
+Physical Health
+Canoeing
+Carpentry
+Close Combat
+Cycling
+Marching
+Running
+Sailboating
+Swimming
+69
+
+===== PAGE 15 =====
+Firearm Use,
+Basic (All
+firearms)
+Wilderness
+Survival,
+Basic
+Firearm Use, Shotgun (Requires Basic Firearm Use)
+Mental Health
+Drive Car
+Drive Motorcycle
+Firearm Use, Advanced (requires Basic Firearm Use) (Specific to Rifle or SubMG)
+Firearm Use, Sniper (requires Firearm Use, Advanced (Rifle))
+Interrogation (requires Basic Psychology)
+Impersonate (requires Disguise)
+Language Spoken, Primary
+Language Spoken, Secondary (requires Primary Language Spoken)
+Manners, Basic
+Pilot Plane (requires Drive Car)
+Visual Art
+For example:
+RE IR AP PH ME
+6 3 6 7 4
+RE Skills
+Computer Operation → Computer Programming → Artificial Intelligence
+First Aid
+Electronics, Basic → Electronics Repair
+IR Skills
+Computer Virus Creation
+Hunting
+Hacking
+AP Skills
+PH Skills
+Disguise
+Evade
+Orate
+Firearm Use, Basic
+Swimming
+Wilderness Survival, Basic
+Marching
+Close Combat
+Carpentry
+Cycling
+ME Skills
+Firearm Use, Advanced (Rifle)
+70
+
+===== PAGE 16 =====
+Firearm Use, Sniper
+Drive Car
+Language Spoken, Primary (Majority)
+The World of Field of Chaos
+Early 1990s – A small armed insurrection occurs. In the process of squashing the insurrection a substantial number of
+civilians are killed. This ferments a revolutionary spirit in a majority of the population. This divides the population
+based on social classes with the wealthy and the quisling middle-class forming their own communities.
+Late 1990s – In cracking down on the majority, walled and militarized settlements are created in existing cities. These
+environments are specially policed and controlled. Economic wealth flows to those elite areas while the majority of
+the population are forced into high-rise apartment towers.
+1999 – Led by a small group of youthful leaders, the majority population attempt a revolution against the ruling elite.
+This includes the use of dirty bomb technology and ultimately leaves a majority of the environment in ruin following
+excessive bombing of the majority population.
+2003 – Following a brief lull in the fighting and an observed truce, the ruling elite attempts a mass extermination
+program forcing the majority population into labor camps leaving the created cities virtually deserted. Armed
+insurrection follows.
+Mid-2000s – The fighting continues. For the majority, all economic resources dry up. The majority are left to fend for
+themselves through the huge crumbling cities that are left. Some try creating agricultural communes as a means of
+growing food however these fail and mass starvation further reduces the majority population.
+2012 – A truce is declared as a means of further concentrating the majority and eradicating them. Small groups of the
+majority continue to hide in the ruined cities and form roving revolutionary gangs dressed in the clothes of their
+parents' last factory jobs.
+Mid-2010s – Increasingly cultist, the ruling class begins a series of experiments to try to create a sub-human species
+including attempts at resurrection and various other strange experiments.
+General Notes
+Technology has been stifled through years of war. The internet does not exist however a cultist mythology around
+modem connected networks (known as the Wazarin) forms the basis for any electronic communication. History prior
+to the 1990s is conveyed through mythology.
+The history outlined above is a limited overview designed to give a player a basic understanding of what their
+Character knows.
+There are two languages available – Majority and Elite.
+71
+
+===== PAGE 17 =====
+HOUSE RULES
+Close Range Standard Range Long Range
+Sniper Rifle 288 yards 432 yards 576 yards
+Rifle 216 yards 324 yards 432 yards
+SubMG 96 yards 192 yards
+x d6 1 / + 1* / + 2** 2 / + 1* / + 2** 3 / + 1* / + 2**
+Required to hit 4-6 8-12 14-18
+Modifiers Some Cover (-1d) Target Moving Fast (-1d) Target Has Evade (-1d)
+Shots per turn Movement Rule Special rules
+Sniper Rifle 1 Cannot move and fire
+Rifle 1 or 2** Slow / Standard**
+SubMG 4 Fast Jams on any 1 (in the used roll)
+* Has Firearm Use, Basic (Or Firearm Use, Advanced in the case of the Sniper Rifle)
+** Has Firearm Use, Advanced for that specific weapon or Firearm Use, Sniper in the case of the Sniper Rifle
+A standard clip has 10 rounds. It takes a turn to change a clip and one turn to clear a jam.
+Movement
+Slow
+Standa
+rd Fast
+2 / + 1 yards per
+second 4 / + 2 yards
+per second 7 / + 3
+yards per second
+(Has Evade Skill)
+(Has Marching
+Skill) (Has
+Running Skill)
+BULLET HITS
+To hit from bullet: 2d6
+Left Arm 4 (3/36)
+Left Leg 6 (5/36)
+Right Leg 8 (5/36)
+Right Arm 10 (3/36)
+Hea
+d
+12 (1/36)
+Body Hit Remainder (19/36)
+WOUNDS
+wounds:
+Health is attributed to sections of the body. In general a player will start with the following amount of potential
+Head 1 W
+|
+Left Arm 1W ---- Body 4 W Right Arm 1W
+------
+/ \
+Left Leg 2W Right Leg 2W
+A leg with 0 wounds remaining halves movement. If both legs have 0 wounds remaining, the Character can't move.
+A Character with 0 wounds remaining in one arm can not fire a firearm.
+A Character with 0 wounds remaining either the head or body are unconscious.
+72
+
+===== PAGE 18 =====
+A Character with less than 6 total wounds remaining is in grave condition. Roll 2d6 per turn, if they roll above their
+Physical Health, they become unconscious.
+Once a character drops to no wounds remaining they are considered dead.
+Single wounds inflicted to the chest winds a character. Roll 2d6, if they roll above their Physical Health they are
+unable to perform an action for the dice roll minus their Physical Health number of turns.
+MELEE HITS
+x d6 1 / + 1* / + 2**
+To hit from blow 2-6
+To hit from weapon 3-6
+* Has Skill Close Combat (for blow or weapon) or Clandestine or Improvised Weapon Use (where applicable)
+** Has Skill Close Combat (for weapon) and Clandestine or Improvised Weapon Use (where applicable)
+TO HEAL
+Without any medical skills, roll 1 dice per turn. On a 6, one wound is recovered. If a bandage or other medical
+equipment is used, on a 5-6, one wound is recovered.
+With First Aid skills, two dice can be rolled and the top value is picked. With Paramedic skills, three dice are rolled
+and the top dice is picked. With Pharmaceutical Chemistry, four dice are rolled and the top two dice are picked to get
+a possible two wounds recovered (with either a 6 or a 5-6 depending on if equipment is used or not).
+INITIATIVE ORDER
+Going into battle the Player(s) always have the initiative however the initiative order between players is determined
+by 2d6 + Mental Health.
+FOES
+Animal
+Head shot releases Psychnosis Gas (only achieves head shot on 5-6 on d6).
+Gas Attack – Psychnosis Gas (Double rolls required / half move).
+Gas cloud covers 3d6 + 12 yard radius and reduces 6 yards per turn moving in 6 yards direction d6.
++1 dice for all attacks.
+Hunter
++ 1 movement.
+Soldiers
+Every shot wound has an armor save (5-6 on d6), including headshots.
+WEAPONS SPECIAL RULES
+SHOTGUN
+A shotgun blast provides a spread trajectory of buckshot in a blast area. The blast area is 45 yards long and 9 yards
+wide at the end. Any model in the trajectory within the 10 yards length (2 yards wide) receives 2d6 wounds. If there
+are no models in this area, any model in the 20 yards length (4 yards wide) receives d6 wounds. If there are no models
+in this area, any model in 30 yards in length (6 yards wide) receives d3 wounds (d6 divided by 2, round up).
+GRENADE
+Grenades can be thrown up to 50 yards. They are a blast radius weapon with a blast radius of 3 yards. Any model in 3
+73
+yard radius of the grenade receives d6 wounds. Any model in 6 yard radius of the grenade receives d3 wounds (d6
+divided by 2, round up). Any model in 9 yard of the grenade receives d2 wounds (d6 divided by 3 round down (i.e. 0-
+2 wounds)). Grenades have concussive force so when a grenade is thrown into a building with at least two walls
+doubles the effective radius of the grenade. The act of throwing a grenade halves movement or other abilities in a turn.
+
+===== PAGE 19 =====
+Technically a character can throw two grenades per turn and remain stationary.
+Grenades have a variable reliability based on their age and a variety of factors which the Character may not know at
+the time the grenades are thrown. 2d6 are rolled each grenade throw. If the roll is 4 or less, the grenade is a dud and it
+does not fire.
+Grenades throw up debris when they explode. This creates an effect of Some Cover on any shots through the blast
+area.
+74
+
+===== PAGE 21 =====
+Name
+R
+L
+___________________
+Primary Weapon
+_________________
+Ammunition
+_________________
+Clips
+___________________
+Secondary Weapon
+___________________
+Melee Weapon
+___________________
+Equipment
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+__________________________________________________________________________________
+76
+
+===== PAGE 22 =====
+Regular Intelligence ________________
+Skills
+_______________________________________________________________
+_______________________________________________________________________
+_______________________________________________________________________
+Irregular Intelligence ________________
+Skills
+_______________________________________________________________
+_______________________________________________________________________
+_______________________________________________________________________
+Appearance ________________
+Skills
+_______________________________________________________________
+_______________________________________________________________________
+Physical Health
+________________
+Skills
+_______________________________________________________________
+_______________________________________________________________________
+_______________________________________________________________________
+Mental Health
+________________
+Skills
+_______________________________________________________________
+_______________________________________________________________________
+_______________________________________________________________________
+77
+
+===== PAGE 23 =====
+Weapon (None / Basic / Advanced) 1
+Clips 1 4 1
+Rounds 2 2
+Physical Health 6 (?) (None / First Aid / Paramedic) Evade / Marching / Run
+Weapon (None / Basic / Advanced) 1
+Clips 1 4 1
+Rounds 2 2
+Physical Health 6 (?) (None / First Aid / Paramedic) Evade / Marching / Run
+Weapon (None / Basic / Advanced) 1
+Clips 1 4 1
+Rounds 2 2
+Physical Health 6 (?) (None / First Aid / Paramedic) Evade / Marching / Run
+Weapon (None / Basic / Advanced) 1
+Clips 1 4 1
+Rounds 2 2
+Physical Health 6 (?) (None / First Aid / Paramedic) Evade / Marching / Run
+Weapon (None / Basic / Advanced) 1
+Clips 1 4 1
+Rounds 2 2
+Physical Health 6 (?) (None / First Aid / Paramedic) Evade / Marching / Run
+78
