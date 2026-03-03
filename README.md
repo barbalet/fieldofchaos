@@ -14,38 +14,75 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 - Build a C-language program version of the game rules for validation, review, and debugging.
 - Keep source material traceable back to the original PDF while maintaining implementation-friendly Markdown documentation.
 
-## C Utility
+## C Utilities
 
-The project now includes a C utility in `src/`:
+The project includes two executables in `src/`:
 
-- Source: `src/fieldofchaos.c`
-- Build file: `src/Makefile`
+- `fieldofchaos` from `src/fieldofchaos.c`
+- `character_create` from `src/character_create.c`
 
-Build:
+Build both programs:
 
 ```bash
 cd src
 make
 ```
 
-### Create character JSON
+Or build one program at a time:
 
 ```bash
-./fieldofchaos create ../docs/alice.json Alice --weapon rifle --firearm-basic --evade
-./fieldofchaos create ../docs/bob.json Bob --weapon submg --firearm-advanced --running
+cd src
+make fieldofchaos
+make character_create
 ```
 
-The `create` command writes JSON files with:
+### Character creation with `character_create`
 
-- core stats: `RE`, `IR`, `AP`, `PH`, `ME`
-- selected skills relevant to combat simulation
-- loadout data (`weapon`, `clips`, `rounds_in_clip`, armor/cover flags)
-- wound pools per body location
+Run from `src/`:
 
-### Run duel simulation
+```bash
+./character_create ../docs/alice.json Alice --weapon rifle --firearm-basic --evade --seed 42
+./character_create ../docs/bob.json Bob --weapon submg --firearm-advanced --running --seed 99
+```
+
+Usage:
+
+```bash
+./character_create <output.json> <name> [options]
+```
+
+### Character creation with `fieldofchaos create`
+
+Run from `src/`:
+
+```bash
+./fieldofchaos create ../docs/alice.json Alice --weapon rifle --firearm-basic --evade --seed 42
+./fieldofchaos create ../docs/bob.json Bob --weapon submg --firearm-advanced --running --seed 99
+```
+
+Usage:
+
+```bash
+./fieldofchaos create <output.json> <name> [options]
+```
+
+### Run duel simulation with `fieldofchaos duel`
+
+After creating two character JSON files, run:
 
 ```bash
 ./fieldofchaos duel ../docs/alice.json ../docs/bob.json --range close --seed 42
 ```
 
-This runs turn-by-turn combat until one winner is declared.
+Usage:
+
+```bash
+./fieldofchaos duel <character_a.json> <character_b.json> [options]
+```
+
+Common duel options:
+
+- `--range close|standard|long`
+- `--seed <int>`
+- `--max-rounds <int>`
+- `--quiet`
