@@ -1,0 +1,35 @@
+{
+  "name": "Bob",
+  "stats": {
+    "RE": 5,
+    "IR": 4,
+    "AP": 3,
+    "PH": 7,
+    "ME": 5
+  },
+  "skills": {
+    "firearm_basic": true,
+    "firearm_advanced": true,
+    "firearm_sniper": false,
+    "evade": false,
+    "marching": false,
+    "running": true,
+    "close_combat": false
+  },
+  "loadout": {
+    "weapon": "submg",
+    "clips": 4,
+    "rounds_in_clip": 10,
+    "armor_save": false,
+    "in_cover": false,
+    "medical": "first_aid"
+  },
+  "wounds": {
+    "head": 1,
+    "body": 4,
+    "left_arm": 1,
+    "right_arm": 1,
+    "left_leg": 2,
+    "right_leg": 2
+  }
+}
