@@ -13,6 +13,26 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 
 - Build a C-language program version of the game rules for validation, review, and debugging.
 - Keep source material traceable back to the original PDF while maintaining implementation-friendly Markdown documentation.
+- Plan the path from the current C rules prototype to a packaged SwiftUI/Metal/C playable game: `docs/playable-game-60-cycle-plan.md`.
+- Track the first ten execution cycles in `docs/cycles-01-10-execution.md`.
+- Track cycles 11-20 in `docs/cycles-11-20-execution.md`.
+- Track cycles 21-30 in `docs/cycles-21-30-execution.md`.
+- Track cycles 31-40 in `docs/cycles-31-40-execution.md`.
+- Track cycles 41-50 in `docs/cycles-41-50-execution.md`.
+- Track cycles 51-60 in `docs/cycles-51-60-execution.md`.
+
+## Architecture
+
+- Reusable C engine API: `src/engine/include/fieldofchaos_engine.h`
+- C engine implementation: `src/engine/fieldofchaos_engine.c`
+- CLI wrappers: `src/fieldofchaos.c` and `src/character_create.c`
+- SwiftUI app shell: `AppShell/FieldOfChaosAppShell.swift`
+- Swift app state and views: `AppShell/GameStore.swift`, `AppShell/AppViews.swift`, and `AppShell/CInterop.swift`
+- Skirmish board model and Metal renderer: `AppShell/SkirmishModel.swift`, `AppShell/SkirmishViews.swift`, and `AppShell/BoardRenderer.swift`
+- Rule reference UI: `AppShell/RuleReference.swift` and `AppShell/RuleViews.swift`
+- Campaign model and UI: `AppShell/CampaignModel.swift` and `AppShell/CampaignViews.swift`
+- Tutorial flow: `AppShell/TutorialModel.swift`
+- Swift Package manifest: `Package.swift`
 
 ## C Utilities
 
@@ -85,4 +105,30 @@ Common duel options:
 - `--range close|standard|long`
 - `--seed <int>`
 - `--max-rounds <int>`
+- `--event-log <path>` writes JSON-lines structured roll/result events
 - `--quiet`
+
+Run deterministic C engine tests:
+
+```bash
+cd src
+make test
+```
+
+Build the SwiftUI shell and C engine package:
+
+```bash
+swift build
+```
+
+Run the SwiftUI shell from the repository root:
+
+```bash
+swift run FieldOfChaosAppShell
+```
+
+Create a local release candidate app bundle:
+
+```bash
+sh scripts/package_release.sh
+```

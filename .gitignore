@@ -1,0 +1,7 @@
+.DS_Store
+.build/
+dist/
+src/fieldofchaos
+src/character_create
+src/engine/*.o
+src/tests/test_engine
