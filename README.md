@@ -20,6 +20,8 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 - Track cycles 31-40 in `docs/cycles-31-40-execution.md`.
 - Track cycles 41-50 in `docs/cycles-41-50-execution.md`.
 - Track cycles 51-60 in `docs/cycles-51-60-execution.md`.
+- Track cycles 61-80 in `docs/cycles-61-80-execution.md`.
+- Track cycles 81-100 in `docs/cycles-81-100-execution.md`.
 
 ## Architecture
 
@@ -34,6 +36,9 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 - Tutorial flow: `AppShell/TutorialModel.swift`
 - Swift Package manifest: `Package.swift`
 - Mac Xcode project: `FieldOfChaos.xcodeproj`
+- Playable Mac completion checklist: `docs/playable-mac-acceptance-checklist.md`
+- Campaign system notes: `docs/campaign-system.md`
+- Cycle-100 release QA: `docs/release-candidate-qa.md`
 
 ## Xcode
 
@@ -158,4 +163,10 @@ Create a local release candidate app bundle:
 
 ```bash
 sh scripts/package_release.sh
+```
+
+Run the playable Mac smoke check:
+
+```bash
+sh scripts/smoke_playable.sh
 ```

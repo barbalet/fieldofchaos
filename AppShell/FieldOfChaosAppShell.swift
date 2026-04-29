@@ -11,6 +11,11 @@ struct FieldOfChaosAppShell: App {
         }
         .commands {
             CommandMenu("Game") {
+                Button("Play") {
+                    store.section = .start
+                }
+                .keyboardShortcut("0", modifiers: [.command])
+
                 Button("New Character") {
                     store.presentCreation = true
                 }
@@ -48,6 +53,46 @@ struct FieldOfChaosAppShell: App {
                 }
                 .keyboardShortcut("r")
 
+                Button("Scenario Setup") {
+                    store.section = .scenario
+                }
+                .keyboardShortcut("1", modifiers: [.command])
+
+                Button("Generate Skirmish") {
+                    store.generateScenario()
+                }
+                .keyboardShortcut("g", modifiers: [.command])
+
+                Button("Save Skirmish") {
+                    store.saveSkirmish()
+                }
+                .keyboardShortcut("s", modifiers: [.command, .shift])
+
+                Button("Load Skirmish") {
+                    store.loadSkirmish()
+                }
+                .keyboardShortcut("o", modifiers: [.command])
+
+                Button("Wait Active Actor") {
+                    store.waitCurrentActor()
+                }
+                .keyboardShortcut("w", modifiers: [.command, .option])
+
+                Button("Reload Active Actor") {
+                    store.reloadCurrentActor()
+                }
+                .keyboardShortcut("r", modifiers: [.command, .option])
+
+                Button("Clear Active Jam") {
+                    store.clearCurrentActor()
+                }
+                .keyboardShortcut("j", modifiers: [.command, .option])
+
+                Button("Run AI Turn") {
+                    store.runManualAITurn()
+                }
+                .keyboardShortcut("a", modifiers: [.command, .option])
+
                 Button("Run Duel Log") {
                     store.runDuelLog()
                     store.section = .log
@@ -60,6 +105,10 @@ struct FieldOfChaosAppShell: App {
 
                 Button("Export Campaign Backup") {
                     store.exportCampaignBackup()
+                }
+
+                Button("Import Campaign Backup") {
+                    store.importCampaignBackup()
                 }
 
                 Button("Rule Reference") {

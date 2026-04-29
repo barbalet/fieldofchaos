@@ -15,7 +15,19 @@ func stringFromCArray<T>(_ value: T) -> String {
     }
 }
 
-enum WeaponChoice: String, CaseIterable, Identifiable {
+func writeStringToCArray<T>(_ string: String, _ value: inout T) {
+    withUnsafeMutableBytes(of: &value) { buffer in
+        buffer.initializeMemory(as: UInt8.self, repeating: 0)
+        let bytes = Array(string.utf8.prefix(max(0, buffer.count - 1)))
+        buffer.copyBytes(from: bytes)
+    }
+}
+
+func totalWounds(_ wounds: FocWounds) -> Int {
+    Int(wounds.head + wounds.body + wounds.left_arm + wounds.right_arm + wounds.left_leg + wounds.right_leg)
+}
+
+enum WeaponChoice: String, CaseIterable, Identifiable, Codable {
     case none
     case sniper
     case rifle
@@ -44,7 +56,7 @@ enum WeaponChoice: String, CaseIterable, Identifiable {
     }
 }
 
-enum MedicalChoice: String, CaseIterable, Identifiable {
+enum MedicalChoice: String, CaseIterable, Identifiable, Codable {
     case none
     case firstAid = "first_aid"
     case paramedic
@@ -184,7 +196,7 @@ struct CombatLogEvent: Identifiable, Equatable {
     }
 }
 
-enum MovementPace: String, CaseIterable, Identifiable {
+enum MovementPace: String, CaseIterable, Identifiable, Codable {
     case slow
     case standard
     case fast
@@ -253,6 +265,7 @@ extension FocEventBuffer {
 
 struct ScenarioSummary {
     var seed: UInt32
+    var difficulty: Int
     var width: Int
     var height: Int
     var objective: String
@@ -264,9 +277,10 @@ struct ScenarioSummary {
     var briefing: String
     var cScenario: FocScenario
 
-    init(scenario: FocScenario) {
+    init(scenario: FocScenario, difficulty: Int = 1) {
         cScenario = scenario
         seed = scenario.seed
+        self.difficulty = max(1, difficulty)
         width = Int(scenario.width)
         height = Int(scenario.height)
         objective = String(cString: foc_objective_to_string(scenario.objective))

@@ -22,6 +22,9 @@ struct SkirmishWorkspaceView: View {
                     }
                     .frame(width: 150)
 
+                    Toggle("Auto", isOn: $skirmish.aiEnabled)
+                        .toggleStyle(.checkbox)
+
                     Button {
                         store.resetSkirmish()
                     } label: {
@@ -41,6 +44,18 @@ struct SkirmishWorkspaceView: View {
                     }
 
                     Button {
+                        store.quickSaveSkirmish()
+                    } label: {
+                        Label("Save", systemImage: "square.and.arrow.down")
+                    }
+
+                    Button {
+                        store.loadSkirmish()
+                    } label: {
+                        Label("Load", systemImage: "folder")
+                    }
+
+                    Button {
                         store.showRuleOverlay = true
                     } label: {
                         Label("Rules", systemImage: "book")
@@ -50,14 +65,13 @@ struct SkirmishWorkspaceView: View {
                 ZStack {
                     SkirmishMetalView(renderState: skirmish.renderState)
                     BoardTapLayer(skirmish: skirmish) { result in
-                        if let result {
-                            store.appendBoardEvents(result.events)
-                            store.statusMessage = result.message
-                        }
+                        store.handleBoardAction(result)
                     }
                 }
                 .aspectRatio(CGFloat(skirmish.columns) / CGFloat(skirmish.rows), contentMode: .fit)
                 .padding(16)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(skirmish.boardAccessibilitySummary)
             }
             .frame(minWidth: 640)
 
@@ -108,9 +122,14 @@ struct SkirmishInspectorView: View {
                     .fontWeight(.semibold)
                 Text("Turn \(skirmish.turnNumber)")
                     .font(.headline)
+                if let current = skirmish.currentActor {
+                    Label("Active: \(current.snapshot.name)", systemImage: current.side == .player ? "person.fill" : "cpu")
+                        .foregroundStyle(current.side == .player ? .green : .orange)
+                }
                 Text(skirmish.message)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel("Status \(skirmish.message)")
             }
 
             if let scenario = skirmish.scenario {
@@ -124,17 +143,17 @@ struct SkirmishInspectorView: View {
 
             if skirmish.outcome.isFinished {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(skirmish.outcome == .playerWon ? "Victory" : "Defeat")
+                    Text(skirmish.outcome.label)
                         .font(.title)
                         .fontWeight(.semibold)
-                        .foregroundStyle(skirmish.outcome == .playerWon ? .green : .orange)
-                Button {
-                    store.completeCampaignMission()
-                } label: {
-                    Label("Advance Campaign", systemImage: "flag.checkered")
+                        .foregroundStyle(skirmish.outcome == .playerWon ? .green : skirmish.outcome == .draw ? .secondary : .orange)
+                    Button {
+                        store.completeCampaignMission()
+                    } label: {
+                        Label("Advance Campaign", systemImage: "flag.checkered")
+                    }
+                    .accessibilityHint("Applies the skirmish result to the campaign record.")
                 }
-                .accessibilityHint("Applies the skirmish result to the campaign record.")
-            }
             }
 
             if let actor = skirmish.selectedActor {
@@ -143,37 +162,50 @@ struct SkirmishInspectorView: View {
                 HStack {
                     Button {
                         let result = skirmish.reloadSelected()
-                        store.appendBoardEvents(result.events)
-                        store.statusMessage = result.message
+                        store.handleBoardAction(result)
                     } label: {
                         Label("Reload", systemImage: "arrow.clockwise")
                     }
 
                     Button {
                         let result = skirmish.clearJamSelected()
-                        store.appendBoardEvents(result.events)
-                        store.statusMessage = result.message
+                        store.handleBoardAction(result)
                     } label: {
                         Label("Clear", systemImage: "wrench.adjustable")
                     }
 
                     Button {
                         let result = skirmish.waitSelected()
-                        store.appendBoardEvents(result.events)
-                        store.statusMessage = result.message
+                        store.handleBoardAction(result)
                     } label: {
                         Label("Wait", systemImage: "pause")
                     }
 
                     if actor.side == .opponent {
-                        Button {
-                            store.runAITurnIfReady()
-                        } label: {
-                            Label("AI", systemImage: "cpu")
-                        }
+                    Button {
+                        store.runManualAITurn()
+                    } label: {
+                        Label("AI", systemImage: "cpu")
+                    }
                     }
                 }
                 .disabled(actor.id != skirmish.currentActorID)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Actions")
+                        .font(.headline)
+                    ForEach(skirmish.actionHints) { hint in
+                        HStack {
+                            Image(systemName: hint.available ? "checkmark.circle.fill" : "xmark.circle")
+                                .foregroundStyle(hint.available ? .green : .secondary)
+                            Text(hint.title)
+                                .frame(width: 70, alignment: .leading)
+                            Text(hint.detail)
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.caption)
+                    }
+                }
 
                 Divider()
 
@@ -183,16 +215,13 @@ struct SkirmishInspectorView: View {
                 ForEach(skirmish.actors.filter { $0.id != actor.id }) { target in
                     TargetRow(target: target, preview: skirmish.targetingPreview(for: target.id)) {
                         let result = skirmish.attack(targetID: target.id)
-                        store.appendBoardEvents(result.events)
-                        store.statusMessage = result.message
+                        store.handleBoardAction(result)
                     } heal: {
                         let result = skirmish.heal(targetID: target.id)
-                        store.appendBoardEvents(result.events)
-                        store.statusMessage = result.message
+                        store.handleBoardAction(result)
                     } grenade: {
                         let result = skirmish.grenade(targetID: target.id)
-                        store.appendBoardEvents(result.events)
-                        store.statusMessage = result.message
+                        store.handleBoardAction(result)
                     }
                     .disabled(actor.id != skirmish.currentActorID)
                 }

@@ -24,6 +24,7 @@
 		F1000000000000000000000F /* alice.json in Resources */ = {isa = PBXBuildFile; fileRef = A13000000000000000000001 /* alice.json */; };
 		F10000000000000000000010 /* bob.json in Resources */ = {isa = PBXBuildFile; fileRef = A13000000000000000000002 /* bob.json */; };
 		F10000000000000000000011 /* field-of-chaos-rules-natural-english.md in Resources */ = {isa = PBXBuildFile; fileRef = A13000000000000000000003 /* field-of-chaos-rules-natural-english.md */; };
+		F10000000000000000000012 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A14000000000000000000002 /* AppIcon.icns */; };
 		F20000000000000000000001 /* fieldofchaos.c in Sources */ = {isa = PBXBuildFile; fileRef = A12000000000000000000001 /* fieldofchaos.c */; };
 		F20000000000000000000002 /* fieldofchaos_engine.c in Sources */ = {isa = PBXBuildFile; fileRef = A12000000000000000000003 /* fieldofchaos_engine.c */; };
 		F20000000000000000000003 /* character_create.c in Sources */ = {isa = PBXBuildFile; fileRef = A12000000000000000000002 /* character_create.c */; };
@@ -56,6 +57,7 @@
 		A13000000000000000000002 /* bob.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bob.json; sourceTree = "<group>"; };
 		A13000000000000000000003 /* field-of-chaos-rules-natural-english.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "field-of-chaos-rules-natural-english.md"; sourceTree = "<group>"; };
 		A14000000000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A14000000000000000000002 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		A15000000000000000000001 /* FieldOfChaos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FieldOfChaos.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A15000000000000000000002 /* fieldofchaos */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = fieldofchaos; sourceTree = BUILT_PRODUCTS_DIR; };
 		A15000000000000000000003 /* character_create */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = character_create; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -195,6 +197,7 @@
 			isa = PBXGroup;
 			children = (
 				A14000000000000000000001 /* Info.plist */,
+				A14000000000000000000002 /* AppIcon.icns */,
 			);
 			path = packaging;
 			sourceTree = "<group>";
@@ -319,6 +322,7 @@
 				F1000000000000000000000F /* alice.json in Resources */,
 				F10000000000000000000010 /* bob.json in Resources */,
 				F10000000000000000000011 /* field-of-chaos-rules-natural-english.md in Resources */,
+				F10000000000000000000012 /* AppIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

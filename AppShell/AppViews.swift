@@ -33,12 +33,16 @@ struct AppShellView: View {
     @ViewBuilder
     private var detailView: some View {
         switch store.section {
+        case .start:
+            QuickStartView()
         case .roster:
             RosterWorkspaceView()
         case .character:
             CharacterWorkspaceView()
         case .tutorial:
             TutorialWorkspaceView()
+        case .scenario:
+            ScenarioSetupView()
         case .skirmish:
             SkirmishWorkspaceView(skirmish: store.skirmish)
         case .log:
@@ -50,6 +54,201 @@ struct AppShellView: View {
         case .settings:
             SettingsView()
         }
+    }
+}
+
+struct QuickStartView: View {
+    @EnvironmentObject private var store: GameStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            HStack(alignment: .center, spacing: 16) {
+                AppIconPlaceholder(size: 64)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Field of Chaos")
+                        .font(.largeTitle)
+                        .fontWeight(.semibold)
+                    Text(store.statusMessage.isEmpty ? store.activeSkirmishSummary : store.statusMessage)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 16) {
+                GridRow {
+                    QuickActionButton(title: "Continue", symbol: "play.fill", detail: store.activeSkirmishSummary) {
+                        store.section = .skirmish
+                    }
+                    QuickActionButton(title: "Scenario", symbol: "slider.horizontal.3", detail: "\(store.scenarioRecords.count) selected characters") {
+                        store.section = .scenario
+                    }
+                }
+                GridRow {
+                    QuickActionButton(title: "Tutorial", symbol: "graduationcap", detail: "Duel and practice fight") {
+                        store.startTutorialDuel()
+                    }
+                    QuickActionButton(title: "Campaign", symbol: "flag.checkered", detail: store.campaignQuickSummary) {
+                        store.section = .campaign
+                    }
+                }
+                GridRow {
+                    QuickActionButton(title: "New Skirmish", symbol: "shuffle", detail: "Seed \(store.scenarioSeed), difficulty \(store.scenarioDifficulty)") {
+                        store.generateScenario()
+                    }
+                    QuickActionButton(title: "Rules", symbol: "book", detail: "\(store.rules.topics.count) indexed topics") {
+                        store.showRuleOverlay = true
+                    }
+                }
+            }
+
+            Divider()
+
+            HStack(spacing: 20) {
+                Label("\(store.characters.count) characters", systemImage: "person.3")
+                Label("\(store.logEvents.count) log events", systemImage: "dice")
+                Label(store.metalDeviceName, systemImage: "cpu")
+            }
+            .font(.callout)
+            .foregroundStyle(.secondary)
+
+            Spacer()
+        }
+        .padding(24)
+        .frame(maxWidth: 880, alignment: .leading)
+    }
+}
+
+struct QuickActionButton: View {
+    let title: String
+    let symbol: String
+    let detail: String
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: symbol)
+                    .font(.title2)
+                    .frame(width: 28)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline)
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer()
+            }
+            .padding(14)
+            .frame(width: 300, height: 86, alignment: .leading)
+        }
+        .buttonStyle(.bordered)
+        .accessibilityLabel(title)
+        .accessibilityHint(detail)
+    }
+}
+
+struct ScenarioSetupView: View {
+    @EnvironmentObject private var store: GameStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            Text("Scenario")
+                .font(.largeTitle)
+                .fontWeight(.semibold)
+
+            Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 12) {
+                GridRow {
+                    Text("Player").foregroundStyle(.secondary)
+                    Picker("Player", selection: $store.scenarioPlayerID) {
+                        ForEach(store.characters) { record in
+                            Text(record.snapshot.name).tag(Optional(record.id))
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(width: 260)
+                }
+                GridRow {
+                    Text("Opponent").foregroundStyle(.secondary)
+                    Picker("Opponent", selection: $store.scenarioOpponentID) {
+                        ForEach(store.characters) { record in
+                            Text(record.snapshot.name).tag(Optional(record.id))
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(width: 260)
+                }
+                GridRow {
+                    Text("Seed").foregroundStyle(.secondary)
+                    Stepper("\(store.scenarioSeed)", value: $store.scenarioSeed, in: 0...999_999)
+                }
+                GridRow {
+                    Text("Difficulty").foregroundStyle(.secondary)
+                    Stepper("\(store.scenarioDifficulty)", value: $store.scenarioDifficulty, in: 1...5)
+                }
+                GridRow {
+                    Text("Max Turns").foregroundStyle(.secondary)
+                    Stepper("\(store.skirmish.maxTurns)", value: $store.skirmish.maxTurns, in: 8...40)
+                }
+                GridRow {
+                    Text("AI").foregroundStyle(.secondary)
+                    Toggle("Auto-run opponent turns", isOn: $store.skirmish.aiEnabled)
+                }
+                GridRow {
+                    Text("Pace").foregroundStyle(.secondary)
+                    Picker("Pace", selection: $store.skirmish.movementPace) {
+                        ForEach(MovementPace.allCases) { pace in
+                            Text(pace.label).tag(pace)
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(width: 180)
+                }
+            }
+
+            HStack {
+                Button {
+                    store.generateScenario()
+                } label: {
+                    Label("Generate Skirmish", systemImage: "shuffle")
+                }
+                .disabled(store.scenarioRecords.count < 2 || store.scenarioPlayerID == store.scenarioOpponentID)
+
+                Button {
+                    store.generateCampaignScenario()
+                } label: {
+                    Label("Campaign Mission", systemImage: "flag.checkered")
+                }
+                .disabled(store.scenarioRecords.count < 2 || store.scenarioPlayerID == store.scenarioOpponentID)
+
+                Button {
+                    store.loadSkirmish()
+                } label: {
+                    Label("Load Skirmish", systemImage: "folder")
+                }
+            }
+
+            Divider()
+
+            if let scenario = store.skirmish.scenario {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(scenario.title)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    Text(scenario.briefing)
+                        .foregroundStyle(.secondary)
+                    Text("Objective: \(scenario.objective.replacingOccurrences(of: "_", with: " ").capitalized)")
+                    Text("Board: \(scenario.width)x\(scenario.height), seed \(scenario.seed), difficulty \(scenario.difficulty)")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(24)
+        .frame(maxWidth: 760, alignment: .leading)
     }
 }
 
@@ -424,6 +623,11 @@ struct CharacterEditorView: View {
                     LabeledContent("Missions", value: "\(summary.missions)")
                     LabeledContent("XP", value: "\(summary.xp)")
                     LabeledContent("Advances", value: "\(summary.advancesAvailable)")
+                    Picker("Advance", selection: $store.campaignAdvancementChoice) {
+                        ForEach(CampaignAdvancementChoice.allCases) { choice in
+                            Text(choice.label).tag(choice)
+                        }
+                    }
                     Button {
                         store.spendCampaignAdvancementOnSelected()
                     } label: {
@@ -490,6 +694,12 @@ struct DiceLogView: View {
                     Label("Export", systemImage: "square.and.arrow.up")
                 }
             }
+
+            Text(store.logSummary)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
 
             Table(store.filteredLogEvents) {
                 TableColumn("Round") { event in
@@ -570,14 +780,29 @@ struct SettingsView: View {
         Form {
             Section("Application") {
                 HStack(spacing: 14) {
-                    AppIconPlaceholder()
+                    AppIconPlaceholder(size: 48)
                     VStack(alignment: .leading) {
                         Text("Field of Chaos")
                             .font(.headline)
-                        Text("Playable app shell")
+                        Text("Cycle 100 playable Mac build")
                             .foregroundStyle(.secondary)
                     }
                 }
+            }
+
+            Section("Defaults") {
+                Picker("AI Difficulty", selection: $store.preferences.defaultAIDifficulty) {
+                    ForEach(AIDifficulty.allCases) { difficulty in
+                        Text(difficulty.label).tag(difficulty)
+                    }
+                }
+                Picker("Movement Pace", selection: $store.preferences.defaultMovementPace) {
+                    ForEach(MovementPace.allCases) { pace in
+                        Text(pace.label).tag(pace)
+                    }
+                }
+                Toggle("Auto-run AI", isOn: $store.preferences.defaultAIEnabled)
+                Stepper("Max Turns \(store.preferences.defaultMaxTurns)", value: $store.preferences.defaultMaxTurns, in: 8...40)
             }
 
             Section("Runtime") {
@@ -596,6 +821,9 @@ struct SettingsView: View {
                 LabeledContent("Missions", value: "\(summary.missions)")
                 LabeledContent("Wins", value: "\(summary.wins)")
                 LabeledContent("XP", value: "\(summary.xp)")
+                Toggle("Show Play on Launch", isOn: $store.preferences.showQuickStartOnLaunch)
+                Toggle("Sound Cues", isOn: $store.preferences.soundEnabled)
+                Toggle("Reduce Motion", isOn: $store.preferences.reduceMotion)
                 Button {
                     store.exportCampaignBackup()
                 } label: {
@@ -609,15 +837,30 @@ struct SettingsView: View {
 }
 
 struct AppIconPlaceholder: View {
+    var size: CGFloat = 48
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(.gray.opacity(0.18))
-            Text("FoC")
-                .font(.headline)
-                .fontWeight(.bold)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(red: 0.06, green: 0.11, blue: 0.10), Color(red: 0.16, green: 0.24, blue: 0.20)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            VStack(spacing: 2) {
+                Image(systemName: "scope")
+                    .font(.system(size: size * 0.34, weight: .semibold))
+                Text("FoC")
+                    .font(.system(size: size * 0.22, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(red: 0.84, green: 0.66, blue: 0.28), lineWidth: max(1, size / 24))
         }
-        .frame(width: 48, height: 48)
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
     }
 }
 

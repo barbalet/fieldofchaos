@@ -20,3 +20,13 @@ Release candidate acceptance:
 - JSON exports are valid JSON/JSON-lines.
 - AI turns always resolve to an action or wait instead of stalling.
 - Application Support contains recoverable log and campaign snapshots after play.
+
+Cycle 100 smoke checklist:
+
+1. Run `sh scripts/smoke_playable.sh`.
+2. Confirm `dist/Field of Chaos.app/Contents/Resources/AppIcon.icns` exists.
+3. Confirm `dist/Field of Chaos.app/Contents/Resources/alice.json` exists.
+4. Confirm `dist/Field of Chaos.app/Contents/Resources/bob.json` exists.
+5. Confirm `dist/Field of Chaos.app/Contents/Resources/field-of-chaos-rules-natural-english.md` exists.
+6. Change settings and confirm preferences are saved under Application Support.
+7. Relaunch with Play-on-launch enabled and confirm the Play surface opens first.

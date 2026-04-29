@@ -37,6 +37,13 @@ struct CampaignView: View {
                     .foregroundStyle(.secondary)
 
                 HStack {
+                    Picker("Advance", selection: $store.campaignAdvancementChoice) {
+                        ForEach(CampaignAdvancementChoice.allCases) { choice in
+                            Text(choice.label).tag(choice)
+                        }
+                    }
+                    .frame(width: 190)
+
                     Button {
                         store.spendCampaignAdvancementOnSelected()
                     } label: {
@@ -45,9 +52,9 @@ struct CampaignView: View {
                     .disabled(summary.advancesAvailable <= 0 || store.selectedRecord == nil)
 
                     Button {
-                        store.generateScenario()
+                        store.generateCampaignScenario()
                     } label: {
-                        Label("Next Scenario", systemImage: "shuffle")
+                        Label("Next Mission", systemImage: "shuffle")
                     }
 
                     Button {
@@ -55,7 +62,33 @@ struct CampaignView: View {
                     } label: {
                         Label("Backup", systemImage: "square.and.arrow.up")
                     }
+
+                    Button {
+                        store.importCampaignBackup()
+                    } label: {
+                        Label("Import", systemImage: "square.and.arrow.down")
+                    }
                 }
+
+                Divider()
+
+                Text("Campaign Roster")
+                    .font(.headline)
+
+                List(store.campaign.roster) { record in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(record.name)
+                                .font(.headline)
+                            Text("\(record.missions) missions, \(record.xpEarned) XP earned, \(record.injuries) injuries")
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text(record.status)
+                            .foregroundStyle(record.recovery > 0 ? .orange : .green)
+                    }
+                }
+                .frame(minHeight: 120)
 
                 Divider()
 
@@ -72,6 +105,9 @@ struct CampaignView: View {
                                 .foregroundStyle(mission.result == "Win" ? .green : .orange)
                         }
                         Text(mission.summary)
+                            .foregroundStyle(.secondary)
+                        Text("Seed \(mission.seed), difficulty \(mission.difficulty), \(mission.objective.replacingOccurrences(of: "_", with: " ")), +\(mission.rewardXP) XP, \(mission.injuries) injuries")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }

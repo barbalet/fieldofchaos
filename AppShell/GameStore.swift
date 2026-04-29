@@ -5,9 +5,11 @@ import Metal
 import UniformTypeIdentifiers
 
 enum AppSection: String, CaseIterable, Identifiable {
+    case start
     case roster
     case character
     case tutorial
+    case scenario
     case skirmish
     case log
     case rules
@@ -18,9 +20,11 @@ enum AppSection: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
+        case .start: return "Play"
         case .roster: return "Roster"
         case .character: return "Character"
         case .tutorial: return "Tutorial"
+        case .scenario: return "Scenario"
         case .skirmish: return "Skirmish"
         case .log: return "Dice Log"
         case .rules: return "Rules"
@@ -31,9 +35,11 @@ enum AppSection: String, CaseIterable, Identifiable {
 
     var symbol: String {
         switch self {
+        case .start: return "play.circle"
         case .roster: return "person.3"
         case .character: return "person.text.rectangle"
         case .tutorial: return "graduationcap"
+        case .scenario: return "slider.horizontal.3"
         case .skirmish: return "scope"
         case .log: return "list.bullet.rectangle"
         case .rules: return "book"
@@ -161,8 +167,18 @@ struct CharacterDraft: Equatable {
     }
 }
 
+struct GamePreferences: Equatable, Codable {
+    var defaultAIDifficulty: AIDifficulty = .standard
+    var defaultMovementPace: MovementPace = .standard
+    var defaultAIEnabled = true
+    var defaultMaxTurns = 18
+    var soundEnabled = true
+    var reduceMotion = false
+    var showQuickStartOnLaunch = true
+}
+
 final class GameStore: ObservableObject {
-    @Published var section: AppSection = .roster
+    @Published var section: AppSection = .start
     @Published var characters: [CharacterRecord] = []
     @Published var selectedCharacterID: UUID?
     @Published var draft = CharacterDraft()
@@ -177,11 +193,24 @@ final class GameStore: ObservableObject {
     @Published var skirmish = SkirmishState()
     @Published var rules = RuleReferenceStore()
     @Published var showRuleOverlay = false
+    @Published var preferences = GamePreferences() {
+        didSet {
+            guard preferences != oldValue else {
+                return
+            }
+            normalizePreferences()
+            savePreferences()
+            applyPreferencesToCurrentSkirmish()
+        }
+    }
     @Published var campaign = CampaignState()
     @Published var scenarioSeed = 401
     @Published var scenarioDifficulty = 1
+    @Published var scenarioPlayerID: UUID?
+    @Published var scenarioOpponentID: UUID?
     @Published var aiDifficulty: AIDifficulty = .standard
     @Published var tutorial = TutorialState()
+    @Published var campaignAdvancementChoice: CampaignAdvancementChoice = .physicalHealth
 
     let engineVersion: String
     let metalDeviceName: String
@@ -193,9 +222,18 @@ final class GameStore: ObservableObject {
         metalDeviceName = MTLCreateSystemDefaultDevice()?.name ?? "Metal device unavailable"
         supportDirectory = GameStore.makeSupportDirectory()
         rosterDirectory = GameStore.makeRosterDirectory(in: supportDirectory)
+        preferences = GameStore.loadPreferences(from: supportDirectory.appendingPathComponent("preferences.json")) ?? GamePreferences()
+        normalizePreferences()
+        aiDifficulty = preferences.defaultAIDifficulty
+        campaign = CampaignState.load(from: supportDirectory.appendingPathComponent("campaign-autosave.json")) ?? CampaignState()
         rules.load()
         loadInitialRoster()
-        resetSkirmish()
+        if restoreAutosavedSkirmish() {
+            statusMessage = "Skirmish restored."
+        } else {
+            resetSkirmish(announce: false)
+        }
+        section = preferences.showQuickStartOnLaunch ? .start : .scenario
     }
 
     var selectedRecord: CharacterRecord? {
@@ -238,6 +276,45 @@ final class GameStore: ObservableObject {
         ["All"] + Array(Set(logEvents.map(\.type))).sorted()
     }
 
+    var logSummary: String {
+        let rolls = logEvents.filter { $0.roll > 0 }.count
+        let wounds = logEvents.filter { $0.type == "wound" }.count
+        let latest = logEvents.last?.summary ?? "No events yet."
+        return "\(logEvents.count) events, \(rolls) rolls, \(wounds) wounds. Latest: \(latest)"
+    }
+
+    var activeSkirmishSummary: String {
+        let scenarioTitle = skirmish.scenario?.title ?? "No scenario"
+        let active = skirmish.currentActor?.snapshot.name ?? "No active actor"
+        return "\(scenarioTitle). Turn \(skirmish.turnNumber). \(active). \(skirmish.outcome.label)."
+    }
+
+    var campaignQuickSummary: String {
+        let summary = campaign.summary
+        return "\(summary.missions) missions, \(summary.wins) wins, \(summary.losses) losses, \(summary.xp) XP, \(summary.advancesAvailable) advances."
+    }
+
+    var scenarioPlayerRecord: CharacterRecord? {
+        if let scenarioPlayerID,
+           let record = characters.first(where: { $0.id == scenarioPlayerID }) {
+            return record
+        }
+        return characters.first
+    }
+
+    var scenarioOpponentRecord: CharacterRecord? {
+        if let scenarioOpponentID,
+           let record = characters.first(where: { $0.id == scenarioOpponentID }),
+           record.id != scenarioPlayerRecord?.id {
+            return record
+        }
+        return characters.first { $0.id != scenarioPlayerRecord?.id }
+    }
+
+    var scenarioRecords: [CharacterRecord] {
+        [scenarioPlayerRecord, scenarioOpponentRecord].compactMap { $0 }
+    }
+
     func selectCharacter(_ id: UUID?) {
         selectedCharacterID = id
         if let record = selectedRecord {
@@ -275,6 +352,11 @@ final class GameStore: ObservableObject {
         cleanName.withCString { foc_init_default_character(&character, $0) }
         let record = CharacterRecord(id: UUID(), character: character, source: .unsaved)
         characters.append(record)
+        if scenarioPlayerID == nil {
+            scenarioPlayerID = record.id
+        } else if scenarioOpponentID == nil {
+            scenarioOpponentID = record.id
+        }
         selectCharacter(record.id)
         section = .character
         presentCreation = false
@@ -417,16 +499,33 @@ final class GameStore: ObservableObject {
         statusMessage = foc_event_buffer_truncated(&buffer) ? "Duel log truncated." : "Duel log generated."
     }
 
-    func resetSkirmish() {
+    func resetSkirmish(announce: Bool = true) {
         skirmish = SkirmishState()
-        skirmish.start(from: Array(characters.prefix(2)))
-        statusMessage = "Skirmish reset."
+        applyPreferencesToCurrentSkirmish()
+        skirmish.start(from: scenarioRecords)
+        autosaveSkirmish()
+        if announce {
+            statusMessage = "Skirmish reset."
+            playCue(.action)
+        }
     }
 
     func generateScenario() {
-        skirmish.generateScenario(seed: scenarioSeed, difficulty: scenarioDifficulty, records: Array(characters.prefix(2)))
+        skirmish.generateScenario(seed: scenarioSeed, difficulty: scenarioDifficulty, records: scenarioRecords)
+        skirmish.maxTurns = max(8, min(40, skirmish.maxTurns))
+        skirmish.aiEnabled = preferences.defaultAIEnabled
+        skirmish.movementPace = preferences.defaultMovementPace
+        autosaveSkirmish()
         statusMessage = skirmish.scenario?.briefing ?? "Scenario generated."
         section = .skirmish
+        playCue(.action)
+    }
+
+    func generateCampaignScenario() {
+        let summary = campaign.summary
+        scenarioSeed = Int((UInt32(max(0, scenarioSeed)) &+ UInt32(37 + summary.missions * 19)) % 999_999)
+        scenarioDifficulty = max(1, min(5, 1 + summary.wins + summary.missions / 3 - summary.losses / 2))
+        generateScenario()
     }
 
     func appendBoardEvents(_ events: [CombatLogEvent]) {
@@ -437,6 +536,21 @@ final class GameStore: ObservableObject {
         autosaveLogSnapshot()
     }
 
+    func handleBoardAction(_ result: BoardActionResult?) {
+        guard let result else {
+            statusMessage = skirmish.message
+            autosaveSkirmish()
+            return
+        }
+        appendBoardEvents(result.events)
+        statusMessage = result.message
+        autosaveSkirmish()
+        if result.ok {
+            playCue(skirmish.outcome.isFinished ? .outcome : .action)
+            runAutomaticAIIfReady()
+        }
+    }
+
     func runAITurnIfReady() {
         guard skirmish.currentActor?.side == .opponent else {
             return
@@ -444,6 +558,49 @@ final class GameStore: ObservableObject {
         let result = skirmish.runAITurn(difficulty: aiDifficulty)
         appendBoardEvents(result.events)
         statusMessage = result.message
+        autosaveSkirmish()
+        if result.ok {
+            playCue(skirmish.outcome.isFinished ? .outcome : .action)
+        }
+    }
+
+    func runManualAITurn() {
+        guard skirmish.currentActor?.side == .opponent else {
+            statusMessage = "AI is available on opponent turns."
+            playCue(.warning)
+            return
+        }
+        runAITurnIfReady()
+    }
+
+    func waitCurrentActor() {
+        guard selectCurrentActorForCommand() else {
+            return
+        }
+        handleBoardAction(skirmish.waitSelected())
+    }
+
+    func reloadCurrentActor() {
+        guard selectCurrentActorForCommand() else {
+            return
+        }
+        handleBoardAction(skirmish.reloadSelected())
+    }
+
+    func clearCurrentActor() {
+        guard selectCurrentActorForCommand() else {
+            return
+        }
+        handleBoardAction(skirmish.clearJamSelected())
+    }
+
+    private func runAutomaticAIIfReady() {
+        guard skirmish.aiEnabled,
+              skirmish.currentActor?.side == .opponent,
+              !skirmish.outcome.isFinished else {
+            return
+        }
+        runAITurnIfReady()
     }
 
     func startTutorialDuel() {
@@ -473,6 +630,7 @@ final class GameStore: ObservableObject {
         aiDifficulty = .easy
         section = .tutorial
         statusMessage = "Tutorial duel started."
+        playCue(.action)
     }
 
     func startTutorialPracticeFight() {
@@ -502,6 +660,7 @@ final class GameStore: ObservableObject {
         aiDifficulty = .standard
         section = .tutorial
         statusMessage = "Tutorial practice fight started."
+        playCue(.action)
     }
 
     func skipTutorial() {
@@ -554,10 +713,12 @@ final class GameStore: ObservableObject {
             try lines.joined(separator: "\n").appending("\n").write(to: url, atomically: true, encoding: .utf8)
             if announce {
                 statusMessage = "Log exported."
+                playCue(.save)
             }
         } catch {
             if announce {
                 statusMessage = "Log export failed."
+                playCue(.warning)
             }
         }
     }
@@ -574,34 +735,109 @@ final class GameStore: ObservableObject {
         }
     }
 
-    func writeCampaignBackup(to url: URL, announce: Bool = true) {
-        let summary = campaign.summary
-        let object: [String: Any] = [
-            "missions": summary.missions,
-            "wins": summary.wins,
-            "losses": summary.losses,
-            "xp": summary.xp,
-            "advances_available": summary.advancesAvailable,
-            "injuries": summary.injuries,
-            "last_summary": summary.lastSummary,
-            "history": campaign.missions.map { mission in
-                [
-                    "title": mission.title,
-                    "result": mission.result,
-                    "summary": mission.summary
-                ]
+    func importCampaignBackup() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.begin { [weak self] response in
+            guard response == .OK, let url = panel.url else {
+                return
             }
-        ]
+            self?.loadCampaignBackup(from: url)
+        }
+    }
+
+    func writeCampaignBackup(to url: URL, announce: Bool = true) {
         do {
-            let data = try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])
-            try data.write(to: url, options: .atomic)
+            try campaign.save(to: url)
             if announce {
                 statusMessage = "Campaign backup exported."
+                playCue(.save)
             }
         } catch {
             if announce {
                 statusMessage = "Campaign backup failed."
+                playCue(.warning)
             }
+        }
+    }
+
+    func loadCampaignBackup(from url: URL) {
+        guard let loaded = CampaignState.load(from: url) else {
+            statusMessage = "Campaign backup import failed."
+            return
+        }
+        campaign = loaded
+        autosaveCampaignBackup()
+        section = .campaign
+        statusMessage = "Campaign backup imported."
+        playCue(.save)
+    }
+
+    func saveSkirmish() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = "field-of-chaos-skirmish.json"
+        panel.begin { [weak self] response in
+            guard response == .OK, let url = panel.url else {
+                return
+            }
+            self?.writeSkirmish(to: url)
+        }
+    }
+
+    func loadSkirmish() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.begin { [weak self] response in
+            guard response == .OK, let url = panel.url else {
+                return
+            }
+            self?.loadSkirmish(from: url)
+        }
+    }
+
+    func quickSaveSkirmish() {
+        writeSkirmish(to: supportDirectory.appendingPathComponent("skirmish-autosave.json"), announce: true)
+    }
+
+    func writeSkirmish(to url: URL, announce: Bool = true) {
+        guard let save = skirmish.saveState() else {
+            if announce {
+                statusMessage = "No skirmish to save."
+            }
+            return
+        }
+        do {
+            let data = try JSONEncoder.prettySorted.encode(save)
+            try data.write(to: url, options: .atomic)
+            if announce {
+                statusMessage = "Skirmish saved."
+                playCue(.save)
+            }
+        } catch {
+            if announce {
+                statusMessage = "Skirmish save failed."
+                playCue(.warning)
+            }
+        }
+    }
+
+    func loadSkirmish(from url: URL) {
+        do {
+            let data = try Data(contentsOf: url)
+            let save = try JSONDecoder().decode(SkirmishSaveState.self, from: data)
+            skirmish.restore(from: save)
+            autosaveSkirmish()
+            section = .skirmish
+            statusMessage = "Skirmish loaded."
+            playCue(.save)
+        } catch {
+            statusMessage = "Skirmish load failed."
+            playCue(.warning)
         }
     }
 
@@ -611,9 +847,11 @@ final class GameStore: ObservableObject {
             return
         }
         campaign.apply(skirmish: skirmish)
+        carryForwardPlayerCharacter()
         autosaveCampaignBackup()
         statusMessage = campaign.summary.lastSummary
         section = .campaign
+        playCue(.outcome)
     }
 
     func spendCampaignAdvancementOnSelected() {
@@ -623,11 +861,12 @@ final class GameStore: ObservableObject {
             return
         }
         var character = characters[index].character
-        statusMessage = campaign.spendAdvancement(on: &character)
+        statusMessage = campaign.spendAdvancement(campaignAdvancementChoice, on: &character)
         characters[index].character = character
         characters[index].source = .unsaved
         draft = CharacterDraft(record: characters[index])
         autosaveCampaignBackup()
+        playCue(statusMessage.hasPrefix("Advancement applied") ? .save : .warning)
     }
 
     private func loadInitialRoster() {
@@ -636,6 +875,8 @@ final class GameStore: ObservableObject {
             createFallbackRoster()
         }
         selectCharacter(characters.first?.id)
+        scenarioPlayerID = characters.first?.id
+        scenarioOpponentID = characters.dropFirst().first?.id
         runDuelLog()
     }
 
@@ -647,6 +888,9 @@ final class GameStore: ObservableObject {
         }
         let record = CharacterRecord(id: UUID(), character: newCharacter, source: .unsaved)
         characters.append(record)
+        if scenarioOpponentID == nil && record.id != scenarioPlayerID {
+            scenarioOpponentID = record.id
+        }
         selectCharacter(record.id)
         section = .character
         statusMessage = "Imported \(record.snapshot.name)."
@@ -659,6 +903,25 @@ final class GameStore: ObservableObject {
         characters[index].character = character
         characters[index].source = source
         selectCharacter(id)
+    }
+
+    private func carryForwardPlayerCharacter() {
+        guard let player = skirmish.actors.first(where: { $0.side == .player }) else {
+            return
+        }
+        if let scenarioPlayerID,
+           let index = characters.firstIndex(where: { $0.id == scenarioPlayerID }) {
+            characters[index].character = player.character
+            characters[index].source = .unsaved
+            selectCharacter(characters[index].id)
+            return
+        }
+        let playerName = player.snapshot.name
+        if let index = characters.firstIndex(where: { $0.snapshot.name.caseInsensitiveCompare(playerName) == .orderedSame }) {
+            characters[index].character = player.character
+            characters[index].source = .unsaved
+            selectCharacter(characters[index].id)
+        }
     }
 
     private func setCharacterName(_ character: inout FocCharacter, _ name: String) {
@@ -758,6 +1021,85 @@ final class GameStore: ObservableObject {
 
     private func autosaveCampaignBackup() {
         writeCampaignBackup(to: supportDirectory.appendingPathComponent("campaign-autosave.json"), announce: false)
+    }
+
+    private func autosaveSkirmish() {
+        writeSkirmish(to: supportDirectory.appendingPathComponent("skirmish-autosave.json"), announce: false)
+    }
+
+    private func restoreAutosavedSkirmish() -> Bool {
+        let url = supportDirectory.appendingPathComponent("skirmish-autosave.json")
+        guard let data = try? Data(contentsOf: url),
+              let save = try? JSONDecoder().decode(SkirmishSaveState.self, from: data) else {
+            return false
+        }
+        skirmish.restore(from: save)
+        return !skirmish.actors.isEmpty
+    }
+
+    private func selectCurrentActorForCommand() -> Bool {
+        guard !skirmish.outcome.isFinished,
+              let current = skirmish.currentActor,
+              !current.snapshot.dead,
+              !current.snapshot.unconscious else {
+            statusMessage = "No active actor can act."
+            playCue(.warning)
+            return false
+        }
+        skirmish.selectedActorID = current.id
+        skirmish.selectedCell = current.position
+        return true
+    }
+
+    private func normalizePreferences() {
+        preferences.defaultMaxTurns = max(8, min(40, preferences.defaultMaxTurns))
+    }
+
+    private func applyPreferencesToCurrentSkirmish() {
+        aiDifficulty = preferences.defaultAIDifficulty
+        skirmish.movementPace = preferences.defaultMovementPace
+        skirmish.aiEnabled = preferences.defaultAIEnabled
+        skirmish.maxTurns = max(8, min(40, preferences.defaultMaxTurns))
+    }
+
+    private func savePreferences() {
+        let url = supportDirectory.appendingPathComponent("preferences.json")
+        do {
+            let data = try JSONEncoder.prettySorted.encode(preferences)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            statusMessage = "Preferences save failed."
+        }
+    }
+
+    private static func loadPreferences(from url: URL) -> GamePreferences? {
+        guard let data = try? Data(contentsOf: url) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(GamePreferences.self, from: data)
+    }
+
+    private enum GameCue {
+        case action
+        case outcome
+        case save
+        case warning
+    }
+
+    private func playCue(_ cue: GameCue) {
+        guard preferences.soundEnabled else {
+            return
+        }
+        let name: String
+        switch cue {
+        case .action: name = "Tink"
+        case .outcome: name = "Glass"
+        case .save: name = "Pop"
+        case .warning: name = "Basso"
+        }
+        if NSSound(named: NSSound.Name(name))?.play() != true {
+            NSSound.beep()
+        }
     }
 
     private static func makeSupportDirectory() -> URL {
