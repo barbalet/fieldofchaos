@@ -687,7 +687,11 @@ final class GameStore: ObservableObject {
 
     private func loadSampleCharacters() -> [CharacterRecord] {
         guard let docsDirectory = findRepositoryDocsDirectory() else {
-            return []
+            return ["alice", "bob"].compactMap { stem in
+                Bundle.main.url(forResource: stem, withExtension: "json").flatMap { url in
+                    loadCharacter(from: url).map { CharacterRecord(id: UUID(), character: $0, source: .sample(url)) }
+                }
+            }
         }
         return ["alice.json", "bob.json"].compactMap { filename in
             let url = docsDirectory.appendingPathComponent(filename)

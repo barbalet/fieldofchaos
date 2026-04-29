@@ -33,6 +33,33 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 - Campaign model and UI: `AppShell/CampaignModel.swift` and `AppShell/CampaignViews.swift`
 - Tutorial flow: `AppShell/TutorialModel.swift`
 - Swift Package manifest: `Package.swift`
+- Mac Xcode project: `FieldOfChaos.xcodeproj`
+
+## Xcode
+
+Open the Mac project directly:
+
+```bash
+open FieldOfChaos.xcodeproj
+```
+
+The project has these schemes/targets:
+
+- `FieldOfChaos`: SwiftUI + Metal macOS app, with the C engine compiled into the app target.
+- `fieldofchaos`: C command-line utility for create/duel workflows.
+- `character_create`: C character JSON utility.
+- `test_engine`: C engine test executable.
+
+The app target bundles `docs/alice.json`, `docs/bob.json`, and the natural-English rule reference so it can run from Xcode without relying on the repository working directory.
+
+CLI verification from Terminal:
+
+```bash
+xcodebuild -project FieldOfChaos.xcodeproj -scheme FieldOfChaos -configuration Debug build
+xcodebuild -project FieldOfChaos.xcodeproj -scheme fieldofchaos -configuration Debug build
+xcodebuild -project FieldOfChaos.xcodeproj -scheme character_create -configuration Debug build
+xcodebuild -project FieldOfChaos.xcodeproj -scheme test_engine -configuration Debug build
+```
 
 ## C Utilities
 

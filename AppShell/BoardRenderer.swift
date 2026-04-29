@@ -23,7 +23,7 @@ final class BoardRenderer: NSObject, MTKViewDelegate {
         do {
             let library: MTLLibrary
             do {
-                library = try device.makeDefaultLibrary(bundle: .module)
+                library = try device.makeDefaultLibrary(bundle: Self.shaderBundle)
             } catch {
                 library = try device.makeLibrary(source: Self.fallbackShaderSource, options: nil)
             }
@@ -39,6 +39,14 @@ final class BoardRenderer: NSObject, MTKViewDelegate {
         super.init()
         view.device = device
         view.clearColor = MTLClearColor(red: 0.065, green: 0.075, blue: 0.07, alpha: 1)
+    }
+
+    private static var shaderBundle: Bundle {
+        #if SWIFT_PACKAGE
+        return .module
+        #else
+        return .main
+        #endif
     }
 
     private static let fallbackShaderSource = """

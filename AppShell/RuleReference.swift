@@ -84,6 +84,10 @@ final class RuleReferenceStore: ObservableObject {
     }
 
     private func findRulesDocument() -> URL? {
+        if let bundled = Bundle.main.url(forResource: "field-of-chaos-rules-natural-english", withExtension: "md") {
+            return bundled
+        }
+
         var current = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
         for _ in 0..<8 {
             let rules = current.appendingPathComponent("docs/field-of-chaos-rules-natural-english.md")
