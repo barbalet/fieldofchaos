@@ -2,6 +2,7 @@
 .build/
 build/
 dist/
+reports/
 src/fieldofchaos
 src/character_create
 src/engine/*.o

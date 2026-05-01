@@ -39,6 +39,7 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 - Playable Mac completion checklist: `docs/playable-mac-acceptance-checklist.md`
 - Campaign system notes: `docs/campaign-system.md`
 - Cycle-100 release QA: `docs/release-candidate-qa.md`
+- Exploratory UI test suite: `docs/ui-test-suite.md`
 
 ## Xcode
 
@@ -169,4 +170,10 @@ Run the playable Mac smoke check:
 
 ```bash
 sh scripts/smoke_playable.sh
+```
+
+Run the exploratory UI suite:
+
+```bash
+sh scripts/run_ui_exploration.sh
 ```
