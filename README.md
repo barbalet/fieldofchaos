@@ -4,11 +4,12 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 
 ## Rewrite Status
 
-This repository is being rewritten around `pdf/foc-just-the-rules-2018.pdf` as the source of truth. The Swift, Xcode, and macOS app workflow has been retired.
+This repository is being rewritten around `pdf/foc-just-the-rules-gold.pdf` as the source of truth. Gold keeps the 2018 core rules and adds the agreed Shotgun and Grenade rules adapted from 2024. The Swift, Xcode, and macOS app workflow has been retired.
 
 ## Rules Sources
 
-- Canonical source PDF: `pdf/foc-just-the-rules-2018.pdf`
+- Canonical source PDF: `pdf/foc-just-the-rules-gold.pdf`
+- Reference-only 2018 rules PDF: `pdf/foc-just-the-rules-2018.pdf`
 - Reference-only newer PDF: `pdf/foc-just-the-rules-2024.pdf`
 - Reference-only full newer PDF: `pdf/field-of-chaos-rpg-070524.pdf`
 - Reference-only full 2018 PDF: `pdf/foc_rpg_051018.pdf`
@@ -17,7 +18,7 @@ This repository is being rewritten around `pdf/foc-just-the-rules-2018.pdf` as t
 
 - Build a C-language program version of the game rules for validation, review, and debugging.
 - Keep source material traceable back to the original PDF while maintaining implementation-friendly Markdown documentation.
-- Replace the prior playable SwiftUI/Metal/C app direction with a 2018-focused C static library and C program.
+- Replace the prior playable SwiftUI/Metal/C app direction with a Gold-focused C static library and C program.
 - Track the current rewrite in `PLAN.md`.
 
 ## Architecture
@@ -33,4 +34,4 @@ The prior Swift package, Xcode project, app packaging, and UI-test workflows are
 
 ## C Source Status
 
-The old prototype source has been removed. The new 2018-focused C header, library, CLI, tests, and Makefile will be recreated by the remaining development cycles.
+The old prototype source has been removed. The new Gold-focused C header, library, CLI, tests, and Makefile will be recreated by the remaining development cycles.
