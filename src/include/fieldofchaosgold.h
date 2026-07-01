@@ -312,8 +312,20 @@ bool focgold_is_unconscious(const focgold_wounds *wounds);
 bool focgold_is_grave_condition(const focgold_wounds *wounds);
 bool focgold_is_dead(const focgold_wounds *wounds);
 bool focgold_can_firearm(const focgold_wounds *wounds);
+focgold_hit_location focgold_hit_location_for_3d6_total(int total);
 focgold_hit_location focgold_roll_bullet_hit_location(void);
+focgold_hit_location focgold_roll_blast_hit_location(void);
 const char *focgold_hit_location_name(focgold_hit_location location);
+
+int focgold_melee_hit_threshold(focgold_melee_attack attack);
+bool focgold_melee_skill_applies(focgold_melee_attack attack,
+                                 focgold_skill_id skill);
+int focgold_melee_skill_modifier_dice(const focgold_skills *skills,
+                                      focgold_melee_attack attack);
+
+int focgold_healing_dice_count(focgold_healing_method method);
+int focgold_healing_required_to_recover(focgold_healing_method method);
+bool focgold_healing_uses_highest_die(focgold_healing_method method);
 
 bool focgold_resolve_ranged_attack(const focgold_character *attacker,
                                    const focgold_character *target,

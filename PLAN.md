@@ -1,6 +1,6 @@
 # Field Of Chaos Gold Rewrite Plan
 
-Current cycle: 26 / 40
+Current cycle: 31 / 40
 
 Source of truth: `pdf/foc-just-the-rules-gold.pdf`
 
@@ -565,13 +565,18 @@ Acceptance criteria:
 - Cycle 24: Weapon fire rates, reload/jam metadata, and grenade reliability implemented. Standard clip size remains 10 rounds. Rifle and Carbine fire 2 shots with Firearm Advanced; Shotgun fires 1 cone attack; Automatic fires 2 shots and exposes a 2d6 jam roll with threshold 1; SubMG fires 3 shots and exposes a 1d6 jam roll with threshold 1. Automatic and SubMG cannot produce head shots. Changing a clip and clearing a jam each expose a 1-turn cost. Grenade reliability rolls 2d6 and is a dud on 4 or less; no skill modifies grenade reliability.
 - Cycle 25: Called head-shot setup metadata implemented. The API exposes the two-move setup requirement, readiness after two moves, and the rule that missed called head shots miss altogether.
 - Cycle 26: Gold movement and grenade action economy implemented. Movement paces are Very Slow 2 inches with +1 from Evade, Slow 3 inches with +1 from Marching, Standard 5 inches with +1 from Marching, and Fast 8 inches with +2 from Running. One disabled leg halves movement rounded down; two disabled legs prevent movement. Throwing one grenade halves movement rounded down. A stationary character can throw two grenades; the two-grenade turn permissions prevent movement, firearm attack, melee attack, reload, jam clearing, healing, and called-head-shot progress. Verified with direct `cc -std=c11 -Wall -Wextra -pedantic` builds and runs of `/tmp/focgold_test_dice`, `/tmp/focgold_test_stats`, `/tmp/focgold_test_skills`, `/tmp/focgold_test_weapons`, and `/tmp/focgold_test_gold_actions`.
+- Cycle 27: 2018 inherited wound model implemented for Gold. `focgold_default_wounds` now assigns Head 1W, Chest 4W, Abdomen 2W, each Arm 1W, and each Leg 2W for a 13W total. The API uses explicit body parts and has no body-only torso wound pool. Added `src/tests/test_wounds.c`.
+- Cycle 28: Wound effects implemented. One arm at 0W prevents firearm use; Head, Chest, or Abdomen at 0W causes unconsciousness; less than 6 total wounds and more than 0 total wounds marks grave condition; no wounds remaining marks dead. Verified the implementation contains no 2024 grave-condition PH roll and no winded/chest-body rule.
+- Cycle 29: Bullet and blast hit locations implemented. Forced 3d6 total mapping is exposed for tests: 3-8 legs with odd/even side selection, 9-13 chest, 14-15 abdomen, 16-17 arms with odd/even side selection, and 18 head. Random bullet locations roll 3d6 through that mapping, and Gold blast locations for Shotgun/Grenade use the same 3d6 procedure. Added `src/tests/test_hit_locations.c`.
+- Cycle 30: 2018 inherited melee rules implemented for Gold. Blow threshold is 3 on d6, Weapon threshold is 4 on d6, and 2024 2-6 / 3-6 melee thresholds are not used. Relevant skill modifiers are explicit: Close Combat applies to blows, while Improvised Weapon Use Basic and Clandestine Weapon Use Basic apply to melee weapon attacks. Added melee coverage in `src/tests/test_melee_healing.c`.
+- Cycle 31: Gold healing implemented. No-skill healing rolls 1d6 and recovers on 6; bandage/equipment rolls 1d6 and recovers on 5-6; First Aid rolls 2d6 and uses the highest die; Paramedic rolls 3d6 and uses the highest die. Pharmaceutical Chemistry remains represented as a skill but does not improve healing. Verified with direct `cc -std=c11 -Wall -Wextra -pedantic` builds and runs of `/tmp/focgold_test_dice`, `/tmp/focgold_test_stats`, `/tmp/focgold_test_skills`, `/tmp/focgold_test_weapons`, `/tmp/focgold_test_gold_actions`, `/tmp/focgold_test_wounds`, `/tmp/focgold_test_hit_locations`, and `/tmp/focgold_test_melee_healing`.
 
 ## Classification Inventory
 
 | Path | Classification | Notes |
 |---|---|---|
 | `pdf/` | Keep | Contains the Gold source of truth plus retained 2018/2024 reference PDFs. |
-| `src/` | Gold C source in progress | Public Gold header, deterministic dice/seeding, stat caps, stat generation, inherited 2018 skill metadata, Gold weapon/range geometry, ranged modifiers, fire-rate/jam metadata, called head-shot setup, movement, and grenade action economy are implemented. |
+| `src/` | Gold C source in progress | Public Gold header, deterministic dice/seeding, stat caps, stat generation, inherited 2018 skill metadata, Gold weapon/range geometry, ranged modifiers, fire-rate/jam metadata, called head-shot setup, movement, grenade action economy, wound model/effects, hit locations, melee, and healing are implemented. |
 | `docs/` | Removed | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; removed entirely in Cycle 13. |
 | `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
@@ -642,9 +647,9 @@ Acceptance criteria:
 ## Old Source Mechanics To Replace
 
 - Character generation and validation currently use the old `foc_generate_stats` flow and a stat total cap of 40; regenerate from `pdf/foc-just-the-rules-gold.pdf`.
-- Wounds currently use head/body/arms/legs pools of `1/4/1/1/2/2`, body-zero unconsciousness, total-zero death, chest-wind checks, and grave-condition checks; verify all of this against the 2018 rules before reimplementing.
+- Wound mechanics were rebuilt in Cycles 27-29 from Gold: explicit 2018 inherited head/chest/abdomen/arms/legs wound pools, wound effects, and 3d6 hit locations with no body-only torso pool, grave PH roll, or winded/chest-body rule.
 - Weapon/range mechanics were rebuilt in Cycles 22-24 from Gold: inherited 2018 firearm ranges plus agreed Shotgun and Grenade rules.
-- Healing currently uses item-like medical levels (`first_aid`, `paramedic`, `pharma`) and simple d6 thresholds; replace with the Gold medical skills and hierarchy, which keeps the 2018 no-Pharmaceutical-Chemistry-healing rule.
+- Healing mechanics were rebuilt in Cycle 31 from Gold: no-skill, bandage/equipment, First Aid, and Paramedic methods with no Pharmaceutical Chemistry healing improvement.
 - Playable-app systems currently include movement paces, targeting previews, board reload/attack/clear-jam/heal/grenade helpers, scenario generation, AI actions, campaign records, snapshots, event buffers, and JSON-lines event logs; omit unless they are explicitly part of the 2018 core rules library/CLI scope.
 
 ## Current Source Layout
@@ -653,7 +658,7 @@ Acceptance criteria:
 |---|---|
 | `src/include/fieldofchaosgold.h` | Public API header for the Gold static library. |
 | `src/include/` | Public headers for the Gold static library. |
-| `src/lib/fieldofchaosgold.c` | Gold rules library implementation in progress. |
+| `src/lib/fieldofchaosgold.c` | Gold rules library implementation in progress through healing. |
 | `src/lib/fieldofchaosgold_internal.h` | Internal helpers for multi-die rolling. |
 | `src/lib/` | C implementation files for the Gold rules library. |
 | `src/cli/` | C command-line program source. |
@@ -662,4 +667,7 @@ Acceptance criteria:
 | `src/tests/test_skills.c` | Focused skill metadata and hierarchy tests until the full test suite and Makefile are created. |
 | `src/tests/test_weapons.c` | Focused Gold weapon, range, Shotgun, Grenade, fire-rate, jam, and reliability tests. |
 | `src/tests/test_gold_actions.c` | Focused Gold ranged modifier, called head-shot, movement, and grenade action-economy tests. |
+| `src/tests/test_wounds.c` | Focused Gold wound model and wound effect tests. |
+| `src/tests/test_hit_locations.c` | Focused Gold bullet/blast hit-location tests. |
+| `src/tests/test_melee_healing.c` | Focused Gold melee and healing tests. |
 | `src/tests/` | C test source for the Gold rules library and CLI. |

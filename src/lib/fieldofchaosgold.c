@@ -823,3 +823,247 @@ focgold_turn_permissions focgold_two_grenade_turn_permissions(void) {
 
     return permissions;
 }
+
+void focgold_default_wounds(focgold_wounds *wounds) {
+    if (wounds == 0) {
+        return;
+    }
+
+    wounds->head = 1;
+    wounds->chest = 4;
+    wounds->abdomen = 2;
+    wounds->left_arm = 1;
+    wounds->right_arm = 1;
+    wounds->left_leg = 2;
+    wounds->right_leg = 2;
+}
+
+int focgold_total_wounds(const focgold_wounds *wounds) {
+    if (wounds == 0) {
+        return 0;
+    }
+
+    return wounds->head +
+           wounds->chest +
+           wounds->abdomen +
+           wounds->left_arm +
+           wounds->right_arm +
+           wounds->left_leg +
+           wounds->right_leg;
+}
+
+bool focgold_is_unconscious(const focgold_wounds *wounds) {
+    if (wounds == 0) {
+        return false;
+    }
+
+    return wounds->head <= 0 ||
+           wounds->chest <= 0 ||
+           wounds->abdomen <= 0;
+}
+
+bool focgold_is_grave_condition(const focgold_wounds *wounds) {
+    return focgold_total_wounds(wounds) > 0 &&
+           focgold_total_wounds(wounds) < 6;
+}
+
+bool focgold_is_dead(const focgold_wounds *wounds) {
+    return focgold_total_wounds(wounds) <= 0;
+}
+
+bool focgold_can_firearm(const focgold_wounds *wounds) {
+    if (wounds == 0 || focgold_is_dead(wounds) ||
+        focgold_is_unconscious(wounds)) {
+        return false;
+    }
+
+    return wounds->left_arm > 0 && wounds->right_arm > 0;
+}
+
+focgold_hit_location focgold_hit_location_for_3d6_total(int total) {
+    if (total >= 3 && total <= 8) {
+        return (total % 2) == 0 ? focgold_hit_right_leg : focgold_hit_left_leg;
+    }
+    if (total >= 9 && total <= 13) {
+        return focgold_hit_chest;
+    }
+    if (total >= 14 && total <= 15) {
+        return focgold_hit_abdomen;
+    }
+    if (total >= 16 && total <= 17) {
+        return (total % 2) == 0 ? focgold_hit_right_arm : focgold_hit_left_arm;
+    }
+    if (total == 18) {
+        return focgold_hit_head;
+    }
+
+    return focgold_hit_chest;
+}
+
+focgold_hit_location focgold_roll_bullet_hit_location(void) {
+    return focgold_hit_location_for_3d6_total(focgold_roll_d6_sum(3));
+}
+
+focgold_hit_location focgold_roll_blast_hit_location(void) {
+    return focgold_roll_bullet_hit_location();
+}
+
+const char *focgold_hit_location_name(focgold_hit_location location) {
+    static const char *const names[] = {
+        "Left Leg",
+        "Right Leg",
+        "Chest",
+        "Abdomen",
+        "Left Arm",
+        "Right Arm",
+        "Head"
+    };
+
+    if (location < 0 || location > focgold_hit_head) {
+        return 0;
+    }
+
+    return names[location];
+}
+
+int focgold_melee_hit_threshold(focgold_melee_attack attack) {
+    switch (attack) {
+    case focgold_melee_blow:
+        return 3;
+    case focgold_melee_weapon:
+        return 4;
+    }
+
+    return 0;
+}
+
+bool focgold_melee_skill_applies(focgold_melee_attack attack,
+                                 focgold_skill_id skill) {
+    if (attack == focgold_melee_blow) {
+        return skill == focgold_skill_close_combat;
+    }
+    if (attack == focgold_melee_weapon) {
+        return skill == focgold_skill_improvised_weapon_basic ||
+               skill == focgold_skill_clandestine_weapon_basic;
+    }
+
+    return false;
+}
+
+int focgold_melee_skill_modifier_dice(const focgold_skills *skills,
+                                      focgold_melee_attack attack) {
+    int modifier = 0;
+
+    if (skills == 0) {
+        return 0;
+    }
+
+    if (focgold_melee_skill_applies(attack, focgold_skill_close_combat) &&
+        focgold_skill_enabled(skills->close_combat)) {
+        modifier++;
+    }
+    if (focgold_melee_skill_applies(attack, focgold_skill_improvised_weapon_basic) &&
+        focgold_skill_enabled(skills->improvised_weapon_basic)) {
+        modifier++;
+    }
+    if (focgold_melee_skill_applies(attack, focgold_skill_clandestine_weapon_basic) &&
+        focgold_skill_enabled(skills->clandestine_weapon_basic)) {
+        modifier++;
+    }
+
+    return modifier;
+}
+
+bool focgold_resolve_melee(const focgold_character *attacker,
+                           focgold_melee_attack attack,
+                           focgold_melee_result *result) {
+    int threshold;
+
+    if (attacker == 0 || result == 0) {
+        return false;
+    }
+
+    memset(result, 0, sizeof(*result));
+
+    threshold = focgold_melee_hit_threshold(attack);
+    if (threshold == 0) {
+        return false;
+    }
+
+    result->dice_count = 1 +
+                         focgold_melee_skill_modifier_dice(&attacker->skills,
+                                                           attack);
+    result->dice_total = focgold_roll_d6_sum(result->dice_count);
+    result->required_to_hit = threshold;
+    result->hit = result->dice_total >= threshold;
+    result->location = result->hit ? focgold_roll_bullet_hit_location() :
+                                     focgold_hit_chest;
+    result->wounds_inflicted = result->hit ? 1 : 0;
+
+    return true;
+}
+
+int focgold_healing_dice_count(focgold_healing_method method) {
+    switch (method) {
+    case focgold_healing_no_skill:
+    case focgold_healing_bandage:
+        return 1;
+    case focgold_healing_first_aid:
+        return 2;
+    case focgold_healing_paramedic:
+        return 3;
+    }
+
+    return 0;
+}
+
+int focgold_healing_required_to_recover(focgold_healing_method method) {
+    switch (method) {
+    case focgold_healing_no_skill:
+        return 6;
+    case focgold_healing_bandage:
+    case focgold_healing_first_aid:
+    case focgold_healing_paramedic:
+        return 5;
+    }
+
+    return 0;
+}
+
+bool focgold_healing_uses_highest_die(focgold_healing_method method) {
+    return method == focgold_healing_first_aid ||
+           method == focgold_healing_paramedic;
+}
+
+bool focgold_resolve_healing(const focgold_character *healer,
+                             const focgold_character *target,
+                             focgold_healing_method method,
+                             focgold_healing_result *result) {
+    int dice_count;
+    int required;
+
+    (void)healer;
+    (void)target;
+
+    if (result == 0) {
+        return false;
+    }
+
+    memset(result, 0, sizeof(*result));
+
+    dice_count = focgold_healing_dice_count(method);
+    required = focgold_healing_required_to_recover(method);
+    if (dice_count == 0 || required == 0) {
+        return false;
+    }
+
+    result->dice_count = dice_count;
+    result->highest_die = focgold_roll_d6_highest(dice_count);
+    result->required_to_recover = required;
+    result->recovered = result->highest_die >= required;
+    result->location = result->recovered ? focgold_roll_bullet_hit_location() :
+                                           focgold_hit_chest;
+    result->wounds_recovered = result->recovered ? 1 : 0;
+
+    return true;
+}
