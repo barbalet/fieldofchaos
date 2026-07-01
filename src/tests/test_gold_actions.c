@@ -173,6 +173,47 @@ static void test_movement(void) {
                "two disabled legs should prevent movement");
 }
 
+static void test_weapon_movement_rules(void) {
+    expect_true(focgold_weapon_movement_rule(focgold_weapon_sniper_rifle) ==
+                    focgold_movement_very_slow,
+                "sniper rifle should use Very Slow movement");
+    expect_true(focgold_weapon_movement_rule(focgold_weapon_rifle) ==
+                    focgold_movement_slow,
+                "rifle should use Slow movement");
+    expect_true(focgold_weapon_movement_rule(focgold_weapon_carbine) ==
+                    focgold_movement_standard,
+                "carbine should use Standard movement");
+    expect_true(focgold_weapon_movement_rule(focgold_weapon_automatic) ==
+                    focgold_movement_standard,
+                "automatic should use Standard movement");
+    expect_true(focgold_weapon_movement_rule(focgold_weapon_submg) ==
+                    focgold_movement_fast,
+                "SubMG should use Fast movement");
+    expect_true(focgold_weapon_movement_rule(focgold_weapon_shotgun) ==
+                    focgold_movement_standard,
+                "shotgun should default to Standard movement data");
+    expect_true(focgold_weapon_has_referee_movement_rule(focgold_weapon_shotgun),
+                "shotgun should preserve the referee-ruling movement note");
+    expect_true(!focgold_weapon_has_referee_movement_rule(focgold_weapon_rifle),
+                "rifle movement should be table-defined");
+
+    expect_int(focgold_weapon_minimum_range_inches(focgold_weapon_sniper_rifle),
+               12,
+               "sniper rifle should have a 12 inch minimum range");
+    expect_true(!focgold_weapon_can_fire_at_distance(
+                    focgold_weapon_sniper_rifle,
+                    11),
+                "sniper rifle should not fire under 12 inches");
+    expect_true(focgold_weapon_can_fire_at_distance(
+                    focgold_weapon_sniper_rifle,
+                    12),
+                "sniper rifle should fire at 12 inches");
+    expect_true(focgold_weapon_can_fire_at_distance(focgold_weapon_rifle, 0),
+                "rifle should have no minimum range");
+    expect_true(!focgold_weapon_can_fire_at_distance(focgold_weapon_rifle, -1),
+                "negative target distance should be invalid");
+}
+
 static void test_grenade_action_economy(void) {
     focgold_skills no_skills = {0};
     focgold_wounds wounds = mobile_wounds();
@@ -229,6 +270,7 @@ int main(void) {
     test_ranged_modifiers();
     test_called_head_shots();
     test_movement();
+    test_weapon_movement_rules();
     test_grenade_action_economy();
 
     if (failures != 0) {

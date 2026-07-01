@@ -123,6 +123,9 @@ static void print_attack_example(void) {
 
     puts("Deterministic rifle attack");
     printf("can_attack,%d\n", result.can_attack ? 1 : 0);
+    printf("base_dice,%d\n", focgold_ranged_base_dice(focgold_range_close));
+    printf("skill_dice,%d\n", result.skill_dice);
+    printf("modifier_dice,%d\n", result.modifier_dice);
     printf("dice,%d\n", result.dice_count);
     printf("total,%d\n", result.dice_total);
     printf("threshold,%d\n", result.required_to_hit);

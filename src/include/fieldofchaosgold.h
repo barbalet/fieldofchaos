@@ -10,6 +10,7 @@ extern "C" {
 
 enum {
     focgold_character_name_capacity = 64,
+    focgold_area_max_wounds = 12,
     focgold_standard_clip_rounds = 10,
     focgold_reload_turns = 1,
     focgold_clear_jam_turns = 1,
@@ -254,10 +255,29 @@ typedef struct focgold_healing_result {
     int wounds_recovered;
 } focgold_healing_result;
 
+typedef struct focgold_area_target {
+    int id;
+    bool ally;
+    int distance_inches;
+    int lateral_inches;
+} focgold_area_target;
+
+typedef struct focgold_area_damage {
+    int id;
+    bool ally;
+    bool affected;
+    int wounds_inflicted;
+    focgold_hit_location hit_locations[focgold_area_max_wounds];
+    focgold_shotgun_band shotgun_band;
+    focgold_grenade_band grenade_band;
+} focgold_area_damage;
+
 void focgold_seed(unsigned int seed);
 int focgold_roll_d6(void);
+int focgold_roll_damage(focgold_damage_roll roll);
 
 int focgold_stat_total(const focgold_stats *stats);
+int focgold_stat_value(const focgold_stats *stats, focgold_stat_id stat);
 bool focgold_validate_initial_stats(const focgold_stats *stats);
 bool focgold_validate_long_term_stats(const focgold_stats *stats);
 bool focgold_generate_stats(const focgold_stat_generation_choice *choice,
@@ -271,6 +291,10 @@ focgold_stat_id focgold_skill_stat(focgold_skill_id skill);
 const focgold_skill_id *focgold_skill_prerequisites(focgold_skill_id skill,
                                                     size_t *count);
 bool focgold_skill_improves_healing(focgold_skill_id skill);
+size_t focgold_skill_count_for_stat(const focgold_skills *skills,
+                                    focgold_stat_id stat);
+bool focgold_validate_skill_prerequisites(const focgold_skills *skills);
+bool focgold_validate_character_skills(const focgold_character *character);
 
 const char *focgold_weapon_name(focgold_weapon weapon);
 bool focgold_parse_weapon(const char *name, focgold_weapon *weapon);
@@ -280,6 +304,10 @@ int focgold_weapon_range_inches(focgold_weapon weapon,
 int focgold_weapon_shots_per_turn(focgold_weapon weapon,
                                   bool has_firearm_advanced);
 focgold_movement_pace focgold_weapon_movement_rule(focgold_weapon weapon);
+bool focgold_weapon_has_referee_movement_rule(focgold_weapon weapon);
+int focgold_weapon_minimum_range_inches(focgold_weapon weapon);
+bool focgold_weapon_can_fire_at_distance(focgold_weapon weapon,
+                                         int distance_inches);
 bool focgold_weapon_can_head_shot(focgold_weapon weapon);
 int focgold_weapon_jam_dice_count(focgold_weapon weapon);
 int focgold_weapon_jam_threshold(focgold_weapon weapon);
@@ -291,6 +319,14 @@ int focgold_shotgun_total_length_inches(void);
 int focgold_shotgun_band_max_inches(focgold_shotgun_band band);
 int focgold_shotgun_band_width_inches(focgold_shotgun_band band);
 focgold_damage_roll focgold_shotgun_band_wounds(focgold_shotgun_band band);
+bool focgold_shotgun_band_for_target(int distance_inches,
+                                     int lateral_inches,
+                                     focgold_shotgun_band *band);
+bool focgold_resolve_shotgun_area(const focgold_area_target *targets,
+                                  size_t target_count,
+                                  focgold_area_damage *results,
+                                  size_t result_count,
+                                  size_t *affected_count);
 
 int focgold_grenade_throw_range_inches(void);
 int focgold_grenade_radius_inches(focgold_grenade_band band,
@@ -299,9 +335,20 @@ focgold_damage_roll focgold_grenade_band_wounds(focgold_grenade_band band);
 bool focgold_grenade_uses_skill(void);
 bool focgold_grenade_skill_modifies_reliability(focgold_skill_id skill);
 bool focgold_resolve_grenade_reliability(focgold_grenade_reliability_result *result);
+bool focgold_grenade_band_for_distance(int distance_inches,
+                                       bool inside_building,
+                                       focgold_grenade_band *band);
+bool focgold_resolve_grenade_area(const focgold_area_target *targets,
+                                  size_t target_count,
+                                  bool inside_building,
+                                  bool dud,
+                                  focgold_area_damage *results,
+                                  size_t result_count,
+                                  size_t *affected_count);
 
 const char *focgold_range_name(focgold_range_band range);
 int focgold_ranged_base_dice(focgold_range_band range);
+int focgold_ranged_skill_dice(const focgold_skills *skills);
 int focgold_ranged_hit_threshold(focgold_range_band range);
 int focgold_ranged_head_shot_threshold(focgold_range_band range);
 int focgold_ranged_modifier_dice(const focgold_attack_modifiers *modifiers);

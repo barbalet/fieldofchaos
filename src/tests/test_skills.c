@@ -194,11 +194,69 @@ static void test_skill_percentages_and_lookup(void) {
                 "missing skills should report zero value");
 }
 
+static focgold_character accounting_character(void) {
+    focgold_character character = {0};
+
+    character.stats.regular_intelligence = 2;
+    character.stats.irregular_intelligence = 1;
+    character.stats.appearance = 0;
+    character.stats.physical_health = 2;
+    character.stats.mental_health = 1;
+    character.skills.firearm_basic = 20;
+    character.skills.firearm_advanced = 20;
+    character.skills.close_combat = 20;
+    character.skills.first_aid = 20;
+    character.skills.paramedic = 20;
+
+    return character;
+}
+
+static void test_skill_accounting(void) {
+    focgold_character character = accounting_character();
+    focgold_skills missing_prerequisite = {0};
+
+    expect_true(focgold_stat_value(&character.stats,
+                                   focgold_stat_regular_intelligence) == 2,
+                "stat lookup should expose Regular Intelligence value");
+    expect_true(focgold_skill_count_for_stat(&character.skills,
+                                             focgold_stat_physical_health) == 2,
+                "PH should count Firearm Basic and Close Combat");
+    expect_true(focgold_skill_count_for_stat(&character.skills,
+                                             focgold_stat_mental_health) == 1,
+                "ME should count Firearm Advanced");
+    expect_true(focgold_skill_count_for_stat(&character.skills,
+                                             focgold_stat_regular_intelligence) == 2,
+                "RE should count First Aid and Paramedic prerequisite chain");
+    expect_true(focgold_validate_skill_prerequisites(&character.skills),
+                "selected prerequisites should validate");
+    expect_true(focgold_validate_character_skills(&character),
+                "character should validate when skill counts fit stat values");
+
+    character.skills.marching = 20;
+    expect_true(!focgold_validate_character_skills(&character),
+                "selected skills over a stat value should be rejected");
+
+    missing_prerequisite.firearm_advanced = 20;
+    expect_true(!focgold_validate_skill_prerequisites(&missing_prerequisite),
+                "Firearm Advanced without Basic should fail prerequisites");
+    character = accounting_character();
+    character.skills.firearm_basic = 0;
+    expect_true(!focgold_validate_character_skills(&character),
+                "character skill validation should reject missing prerequisites");
+
+    expect_true(focgold_skill_count_for_stat(0,
+                                             focgold_stat_regular_intelligence) == 0,
+                "missing skills should have zero selected skill count");
+    expect_true(!focgold_validate_character_skills(0),
+                "missing character should fail skill accounting validation");
+}
+
 int main(void) {
     test_stat_names();
     test_weapon_skill_metadata();
     test_medical_and_chemistry_metadata();
     test_skill_percentages_and_lookup();
+    test_skill_accounting();
 
     if (failures != 0) {
         fprintf(stderr, "%d failure(s)\n", failures);

@@ -18,6 +18,14 @@ int focgold_roll_d6(void) {
     return (int)(((focgold_next_random() >> 16) % 6u) + 1u);
 }
 
+static int focgold_roll_die_sides(int sides) {
+    if (sides <= 0 || sides > 6 || (6 % sides) != 0) {
+        return 0;
+    }
+
+    return ((focgold_roll_d6() - 1) % sides) + 1;
+}
+
 int focgold_roll_d6_sum(int dice_count) {
     int total = 0;
     int index;
@@ -51,6 +59,21 @@ int focgold_roll_d6_highest(int dice_count) {
     return highest;
 }
 
+int focgold_roll_damage(focgold_damage_roll roll) {
+    int total = 0;
+    int index;
+
+    if (roll.dice_count <= 0 || roll.die_sides <= 0) {
+        return 0;
+    }
+
+    for (index = 0; index < roll.dice_count; index++) {
+        total += focgold_roll_die_sides(roll.die_sides);
+    }
+
+    return total;
+}
+
 int focgold_stat_total(const focgold_stats *stats) {
     if (stats == 0) {
         return 0;
@@ -61,6 +84,29 @@ int focgold_stat_total(const focgold_stats *stats) {
            stats->appearance +
            stats->physical_health +
            stats->mental_health;
+}
+
+int focgold_stat_value(const focgold_stats *stats, focgold_stat_id stat) {
+    if (stats == 0) {
+        return 0;
+    }
+
+    switch (stat) {
+    case focgold_stat_regular_intelligence:
+        return stats->regular_intelligence;
+    case focgold_stat_irregular_intelligence:
+        return stats->irregular_intelligence;
+    case focgold_stat_appearance:
+        return stats->appearance;
+    case focgold_stat_physical_health:
+        return stats->physical_health;
+    case focgold_stat_mental_health:
+        return stats->mental_health;
+    case focgold_stat_count:
+        break;
+    }
+
+    return 0;
 }
 
 static bool focgold_stats_have_valid_values(const focgold_stats *stats) {
@@ -364,6 +410,84 @@ bool focgold_skill_improves_healing(focgold_skill_id skill) {
            skill == focgold_skill_paramedic;
 }
 
+static bool focgold_skill_is_selected(const focgold_skills *skills,
+                                      focgold_skill_id skill) {
+    return focgold_skill_value(skills, skill) > 0;
+}
+
+size_t focgold_skill_count_for_stat(const focgold_skills *skills,
+                                    focgold_stat_id stat) {
+    size_t count = 0;
+    int skill;
+
+    if (skills == 0 || stat < 0 || stat >= focgold_stat_count) {
+        return 0;
+    }
+
+    for (skill = 0; skill < focgold_skill_count; skill++) {
+        focgold_skill_id skill_id = (focgold_skill_id)skill;
+        if (focgold_skill_stat(skill_id) == stat &&
+            focgold_skill_is_selected(skills, skill_id)) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+bool focgold_validate_skill_prerequisites(const focgold_skills *skills) {
+    int skill;
+
+    if (skills == 0) {
+        return false;
+    }
+
+    for (skill = 0; skill < focgold_skill_count; skill++) {
+        focgold_skill_id skill_id = (focgold_skill_id)skill;
+        const focgold_skill_id *prerequisites;
+        size_t prerequisite_count = 0;
+        size_t prerequisite_index;
+
+        if (!focgold_skill_is_selected(skills, skill_id)) {
+            continue;
+        }
+
+        prerequisites = focgold_skill_prerequisites(skill_id,
+                                                    &prerequisite_count);
+        for (prerequisite_index = 0;
+             prerequisite_index < prerequisite_count;
+             prerequisite_index++) {
+            if (!focgold_skill_is_selected(skills,
+                                           prerequisites[prerequisite_index])) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool focgold_validate_character_skills(const focgold_character *character) {
+    int stat;
+
+    if (character == 0 ||
+        !focgold_stats_have_valid_values(&character->stats) ||
+        !focgold_validate_skills(&character->skills) ||
+        !focgold_validate_skill_prerequisites(&character->skills)) {
+        return false;
+    }
+
+    for (stat = 0; stat < focgold_stat_count; stat++) {
+        focgold_stat_id stat_id = (focgold_stat_id)stat;
+        if ((int)focgold_skill_count_for_stat(&character->skills, stat_id) >
+            focgold_stat_value(&character->stats, stat_id)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 const char *focgold_weapon_name(focgold_weapon weapon) {
     static const char *const names[focgold_weapon_count] = {
         "Sniper Rifle",
@@ -469,6 +593,137 @@ focgold_damage_roll focgold_shotgun_band_wounds(focgold_shotgun_band band) {
     return rolls[band];
 }
 
+static int focgold_absolute_int(int value) {
+    return value < 0 ? -value : value;
+}
+
+static void focgold_initialize_area_results(const focgold_area_target *targets,
+                                            size_t target_count,
+                                            focgold_area_damage *results) {
+    size_t index;
+
+    for (index = 0; index < target_count; index++) {
+        size_t location_index;
+
+        memset(&results[index], 0, sizeof(results[index]));
+        results[index].id = targets[index].id;
+        results[index].ally = targets[index].ally;
+        results[index].shotgun_band = focgold_shotgun_band_count;
+        results[index].grenade_band = focgold_grenade_band_count;
+
+        for (location_index = 0;
+             location_index < focgold_area_max_wounds;
+             location_index++) {
+            results[index].hit_locations[location_index] = focgold_hit_chest;
+        }
+    }
+}
+
+static void focgold_apply_area_damage(focgold_damage_roll roll,
+                                      focgold_area_damage *result) {
+    int wound_index;
+    int wounds = focgold_roll_damage(roll);
+
+    if (wounds > focgold_area_max_wounds) {
+        wounds = focgold_area_max_wounds;
+    }
+
+    result->affected = true;
+    result->wounds_inflicted = wounds;
+    for (wound_index = 0; wound_index < wounds; wound_index++) {
+        result->hit_locations[wound_index] = focgold_roll_blast_hit_location();
+    }
+}
+
+bool focgold_shotgun_band_for_target(int distance_inches,
+                                     int lateral_inches,
+                                     focgold_shotgun_band *band) {
+    focgold_shotgun_band candidate;
+    int lateral_distance;
+
+    if (band == 0 || distance_inches < 0) {
+        return false;
+    }
+
+    lateral_distance = focgold_absolute_int(lateral_inches);
+    for (candidate = focgold_shotgun_near;
+         candidate < focgold_shotgun_band_count;
+         candidate++) {
+        int minimum = candidate == focgold_shotgun_near ?
+                      0 :
+                      focgold_shotgun_band_max_inches(
+                          (focgold_shotgun_band)(candidate - 1)) + 1;
+        int maximum = focgold_shotgun_band_max_inches(candidate);
+        int width = focgold_shotgun_band_width_inches(candidate);
+
+        if (distance_inches >= minimum && distance_inches <= maximum &&
+            lateral_distance <= width) {
+            *band = candidate;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool focgold_resolve_shotgun_area(const focgold_area_target *targets,
+                                  size_t target_count,
+                                  focgold_area_damage *results,
+                                  size_t result_count,
+                                  size_t *affected_count) {
+    size_t index;
+    size_t affected = 0;
+    focgold_shotgun_band nearest_band = focgold_shotgun_band_count;
+
+    if (target_count == 0) {
+        if (affected_count != 0) {
+            *affected_count = 0;
+        }
+        return true;
+    }
+    if (targets == 0 || results == 0 || result_count < target_count) {
+        return false;
+    }
+
+    focgold_initialize_area_results(targets, target_count, results);
+
+    for (index = 0; index < target_count; index++) {
+        focgold_shotgun_band band;
+        if (focgold_shotgun_band_for_target(targets[index].distance_inches,
+                                            targets[index].lateral_inches,
+                                            &band) &&
+            band < nearest_band) {
+            nearest_band = band;
+        }
+    }
+
+    if (nearest_band == focgold_shotgun_band_count) {
+        if (affected_count != 0) {
+            *affected_count = 0;
+        }
+        return true;
+    }
+
+    for (index = 0; index < target_count; index++) {
+        focgold_shotgun_band band;
+        if (focgold_shotgun_band_for_target(targets[index].distance_inches,
+                                            targets[index].lateral_inches,
+                                            &band) &&
+            band == nearest_band) {
+            results[index].shotgun_band = band;
+            focgold_apply_area_damage(focgold_shotgun_band_wounds(band),
+                                      &results[index]);
+            affected++;
+        }
+    }
+
+    if (affected_count != 0) {
+        *affected_count = affected;
+    }
+
+    return true;
+}
+
 int focgold_grenade_throw_range_inches(void) {
     return 12;
 }
@@ -506,6 +761,83 @@ focgold_damage_roll focgold_grenade_band_wounds(focgold_grenade_band band) {
     }
 
     return rolls[band];
+}
+
+bool focgold_grenade_band_for_distance(int distance_inches,
+                                       bool inside_building,
+                                       focgold_grenade_band *band) {
+    focgold_grenade_band candidate;
+
+    if (band == 0 || distance_inches < 0) {
+        return false;
+    }
+
+    for (candidate = focgold_grenade_inner;
+         candidate < focgold_grenade_band_count;
+         candidate++) {
+        int minimum = candidate == focgold_grenade_inner ?
+                      0 :
+                      focgold_grenade_radius_inches(
+                          (focgold_grenade_band)(candidate - 1),
+                          inside_building) + 1;
+        int maximum = focgold_grenade_radius_inches(candidate,
+                                                    inside_building);
+
+        if (distance_inches >= minimum && distance_inches <= maximum) {
+            *band = candidate;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool focgold_resolve_grenade_area(const focgold_area_target *targets,
+                                  size_t target_count,
+                                  bool inside_building,
+                                  bool dud,
+                                  focgold_area_damage *results,
+                                  size_t result_count,
+                                  size_t *affected_count) {
+    size_t index;
+    size_t affected = 0;
+
+    if (target_count == 0) {
+        if (affected_count != 0) {
+            *affected_count = 0;
+        }
+        return true;
+    }
+    if (targets == 0 || results == 0 || result_count < target_count) {
+        return false;
+    }
+
+    focgold_initialize_area_results(targets, target_count, results);
+
+    if (dud) {
+        if (affected_count != 0) {
+            *affected_count = 0;
+        }
+        return true;
+    }
+
+    for (index = 0; index < target_count; index++) {
+        focgold_grenade_band band;
+        if (focgold_grenade_band_for_distance(targets[index].distance_inches,
+                                              inside_building,
+                                              &band)) {
+            results[index].grenade_band = band;
+            focgold_apply_area_damage(focgold_grenade_band_wounds(band),
+                                      &results[index]);
+            affected++;
+        }
+    }
+
+    if (affected_count != 0) {
+        *affected_count = affected;
+    }
+
+    return true;
 }
 
 bool focgold_grenade_uses_skill(void) {
@@ -547,9 +879,9 @@ const char *focgold_range_name(focgold_range_band range) {
 
 int focgold_ranged_base_dice(focgold_range_band range) {
     static const int dice[] = {
-        3,
+        1,
         2,
-        1
+        3
     };
 
     if (range < 0 || range > focgold_range_long) {
@@ -557,6 +889,21 @@ int focgold_ranged_base_dice(focgold_range_band range) {
     }
 
     return dice[range];
+}
+
+int focgold_ranged_skill_dice(const focgold_skills *skills) {
+    if (skills == 0) {
+        return 0;
+    }
+
+    if (focgold_skill_is_selected(skills, focgold_skill_firearm_advanced)) {
+        return 2;
+    }
+    if (focgold_skill_is_selected(skills, focgold_skill_firearm_basic)) {
+        return 1;
+    }
+
+    return 0;
 }
 
 int focgold_ranged_hit_threshold(focgold_range_band range) {
@@ -651,8 +998,42 @@ int focgold_weapon_shots_per_turn(focgold_weapon weapon,
 }
 
 focgold_movement_pace focgold_weapon_movement_rule(focgold_weapon weapon) {
-    (void)weapon;
+    switch (weapon) {
+    case focgold_weapon_sniper_rifle:
+        return focgold_movement_very_slow;
+    case focgold_weapon_rifle:
+        return focgold_movement_slow;
+    case focgold_weapon_carbine:
+    case focgold_weapon_automatic:
+    case focgold_weapon_shotgun:
+        return focgold_movement_standard;
+    case focgold_weapon_submg:
+        return focgold_movement_fast;
+    case focgold_weapon_count:
+        break;
+    }
+
     return focgold_movement_standard;
+}
+
+bool focgold_weapon_has_referee_movement_rule(focgold_weapon weapon) {
+    return weapon == focgold_weapon_shotgun;
+}
+
+int focgold_weapon_minimum_range_inches(focgold_weapon weapon) {
+    return weapon == focgold_weapon_sniper_rifle ? 12 : 0;
+}
+
+bool focgold_weapon_can_fire_at_distance(focgold_weapon weapon,
+                                         int distance_inches) {
+    int minimum_range;
+
+    if (weapon < 0 || weapon >= focgold_weapon_count || distance_inches < 0) {
+        return false;
+    }
+
+    minimum_range = focgold_weapon_minimum_range_inches(weapon);
+    return distance_inches >= minimum_range;
 }
 
 bool focgold_weapon_can_head_shot(focgold_weapon weapon) {
@@ -1125,7 +1506,7 @@ bool focgold_resolve_ranged_attack(const focgold_character *attacker,
         return true;
     }
 
-    result->skill_dice = focgold_skill_enabled(attacker->skills.firearm_basic) ? 1 : 0;
+    result->skill_dice = focgold_ranged_skill_dice(&attacker->skills);
     modifier_dice = focgold_ranged_modifier_dice(modifiers);
     result->modifier_dice = modifier_dice;
     dice_count = focgold_ranged_base_dice(range) +

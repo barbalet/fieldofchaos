@@ -1,6 +1,6 @@
 # Field Of Chaos Gold Rewrite Plan
 
-Current cycle: 40 / 52
+Current cycle: 46 / 52
 
 Source of truth: `pdf/foc-just-the-rules-gold.pdf`
 
@@ -772,6 +772,12 @@ Acceptance criteria:
 - Cycle 39: Final consistency pass completed. `git status --short` was reviewed during the cycle, active-file `rg` scans found no stale app workflow references, and this plan was updated to reflect the final completed state.
 - Cycle 40: Completion signoff completed. Current cycle is 40 / 40, `make test` passes from `src/`, `README.md` is final for the Gold C-only project shape, retained PDFs are present including `pdf/foc-just-the-rules-gold.pdf`, and no known required cleanup remains.
 - Post-40 PDF parity audit: Extracted and reviewed `pdf/foc-just-the-rules-gold.pdf` against the C static library and CLI. The 40-cycle C-only rewrite is complete, but true Gold PDF parity is not complete. Known gaps include reversed ranged base dice, incomplete Firearm Advanced dice handling, incomplete weapon movement restrictions, missing Sniper Rifle under-12-inch restriction, missing skill accounting, table-only Shotgun/Grenade area effects, incomplete damage/healing state mutation, incomplete melee +1/+2 skill-dice parity, partial Animal/gas foe rules, and incomplete CLI coverage. Added Cycles 41-52 to finish true PDF parity.
+- Cycle 41: Added `TRACEABILITY.md` as the active Gold PDF parity matrix. Every numbered Gold PDF section and every rules table family is mapped to C/API coverage, tests/CLI coverage, implementation status, and a cycle assignment for remaining partial work. No missing or partial row is left unassigned; remaining work is assigned to Cycles 47-52.
+- Cycle 42: Corrected ranged base dice to Close 1d6, Standard 2d6, and Long 3d6. Added `focgold_ranged_skill_dice` so Firearm Use, Basic contributes +1 skill die and Firearm Use, Advanced contributes +2 skill dice. Updated ranged attack resolution and the CLI attack example to expose base, skill, modifier, and total dice. Added independent tests for base dice and skill dice.
+- Cycle 43: Implemented weapon movement restrictions with Sniper Rifle Very Slow, Rifle Slow, Carbine Standard, Automatic Standard, SubMG Fast, and Shotgun represented as Standard plus a referee movement flag. Added Sniper Rifle 12-inch minimum range helpers and tests for under-12-inch rejection.
+- Cycle 44: Implemented Gold skill accounting. Added stat lookup, selected-skill counting by governing stat, prerequisite validation, and character skill validation against stat values. Tests cover valid accounting, prerequisite accounting, over-limit rejection, missing prerequisites, and no introduction of 2024 use-based advancement.
+- Cycle 45: Implemented Shotgun area resolution. Added area target/result API, cone band classification, nearest occupied band selection, ally inclusion, per-target band damage, and normal 3d6 blast hit-location allocation for every wound. Added `src/tests/test_area_effects.c` coverage for nearest-band behavior, ally inclusion, band damage, and hit locations.
+- Cycle 46: Implemented Grenade area resolution. Added open/building radius classification, dud handling that causes no blast damage, ally inclusion, per-target radius-band damage, and normal 3d6 blast hit-location allocation for every wound. Added tests for open blast, building blast, ally inclusion, dud behavior, and hit-location allocation. Verified `make -C src test` and `make -C src cli`; CLI `attack` now reports `base_dice,1`, `skill_dice,2`, and `dice,3` for the deterministic close-range rifle example.
 
 ## Classification Inventory
 
@@ -779,6 +785,7 @@ Acceptance criteria:
 |---|---|---|
 | `pdf/` | Keep | Contains the Gold source of truth plus retained 2018/2024 reference PDFs. |
 | `src/` | Complete Gold C source | Public Gold header, static library implementation, CLI, Makefile, and focused tests are present. |
+| `TRACEABILITY.md` | Active parity artifact | Maps `pdf/foc-just-the-rules-gold.pdf` rules to source, tests, CLI coverage, and remaining parity cycles. |
 | `docs/` | Removed | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; removed entirely in Cycle 13. |
 | `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
@@ -869,6 +876,7 @@ Acceptance criteria:
 | `src/tests/test_stats.c` | Focused stats and character-generation tests. |
 | `src/tests/test_skills.c` | Focused skill metadata and hierarchy tests. |
 | `src/tests/test_weapons.c` | Focused Gold weapon, range, Shotgun, Grenade, fire-rate, jam, and reliability tests. |
+| `src/tests/test_area_effects.c` | Focused Gold Shotgun and Grenade area-resolution tests. |
 | `src/tests/test_gold_actions.c` | Focused Gold ranged modifier, called head-shot, movement, and grenade action-economy tests. |
 | `src/tests/test_wounds.c` | Focused Gold wound model and wound effect tests. |
 | `src/tests/test_hit_locations.c` | Focused Gold bullet/blast hit-location tests. |

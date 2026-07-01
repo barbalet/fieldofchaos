@@ -172,6 +172,63 @@ static void test_firearm_ranges(void) {
 }
 
 static void test_ranged_thresholds(void) {
+    focgold_skills no_skills = {0};
+    focgold_skills basic = {0};
+    focgold_skills advanced = {0};
+    focgold_character attacker = {0};
+    focgold_character target = {0};
+    focgold_attack_modifiers modifiers = {
+        focgold_cover_none,
+        focgold_target_movement_none,
+        false,
+        false
+    };
+    focgold_attack_result result;
+
+    expect_int(focgold_ranged_base_dice(focgold_range_close),
+               1,
+               "close range should roll 1 base die");
+    expect_int(focgold_ranged_base_dice(focgold_range_standard),
+               2,
+               "standard range should roll 2 base dice");
+    expect_int(focgold_ranged_base_dice(focgold_range_long),
+               3,
+               "long range should roll 3 base dice");
+
+    basic.firearm_basic = 20;
+    advanced.firearm_basic = 20;
+    advanced.firearm_advanced = 20;
+    expect_int(focgold_ranged_skill_dice(&no_skills),
+               0,
+               "unskilled firearm attack should add no skill dice");
+    expect_int(focgold_ranged_skill_dice(&basic),
+               1,
+               "Firearm Basic should add one ranged skill die");
+    expect_int(focgold_ranged_skill_dice(&advanced),
+               2,
+               "Firearm Advanced should add two ranged skill dice");
+
+    attacker.weapon = focgold_weapon_rifle;
+    attacker.skills = advanced;
+    focgold_default_wounds(&attacker.maximum_wounds);
+    focgold_default_wounds(&attacker.current_wounds);
+    focgold_default_wounds(&target.maximum_wounds);
+    focgold_default_wounds(&target.current_wounds);
+    focgold_seed(901u);
+    expect_true(focgold_resolve_ranged_attack(&attacker,
+                                              &target,
+                                              focgold_range_close,
+                                              &modifiers,
+                                              false,
+                                              &result),
+                "advanced close ranged attack should resolve");
+    expect_int(result.skill_dice,
+               2,
+               "ranged attack should expose advanced skill dice");
+    expect_int(result.dice_count,
+               3,
+               "close range plus Firearm Advanced should roll 3 dice");
+
     expect_int(focgold_ranged_hit_threshold(focgold_range_close),
                4,
                "close hit threshold should be 4");
