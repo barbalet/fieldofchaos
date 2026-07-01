@@ -1035,6 +1035,131 @@ bool focgold_healing_uses_highest_die(focgold_healing_method method) {
            method == focgold_healing_paramedic;
 }
 
+bool focgold_animal_head_shot_releases_gas(void) {
+    return true;
+}
+
+int focgold_animal_gas_initial_radius_inches(void) {
+    return focgold_roll_d6() + 6;
+}
+
+int focgold_animal_gas_shrink_per_turn_inches(void) {
+    return 2;
+}
+
+int focgold_animal_gas_drift_inches_per_turn(void) {
+    return 2;
+}
+
+int focgold_animal_gas_drift_direction(void) {
+    return focgold_roll_d6();
+}
+
+int focgold_foe_attack_modifier_dice(focgold_foe_type foe) {
+    return foe == focgold_foe_animal ? 1 : 0;
+}
+
+int focgold_foe_movement_modifier_inches(focgold_foe_type foe) {
+    return foe == focgold_foe_hunter ? 1 : 0;
+}
+
+int focgold_soldier_armor_save_threshold(void) {
+    return 5;
+}
+
+bool focgold_damage_counts_as_shot_for_armor(focgold_damage_source source,
+                                             bool referee_counts_grenade) {
+    switch (source) {
+    case focgold_damage_bullet:
+    case focgold_damage_shotgun:
+        return true;
+    case focgold_damage_grenade:
+        return referee_counts_grenade;
+    case focgold_damage_melee:
+        return false;
+    }
+
+    return false;
+}
+
+bool focgold_resolve_soldier_armor_save(focgold_damage_source source,
+                                        bool referee_counts_grenade,
+                                        bool *saved) {
+    if (saved == 0) {
+        return false;
+    }
+
+    if (!focgold_damage_counts_as_shot_for_armor(source,
+                                                referee_counts_grenade)) {
+        *saved = false;
+        return true;
+    }
+
+    *saved = focgold_roll_d6() >= focgold_soldier_armor_save_threshold();
+    return true;
+}
+
+bool focgold_resolve_ranged_attack(const focgold_character *attacker,
+                                   const focgold_character *target,
+                                   focgold_range_band range,
+                                   const focgold_attack_modifiers *modifiers,
+                                   bool called_head_shot,
+                                   focgold_attack_result *result) {
+    int dice_count;
+    int modifier_dice;
+    bool has_firearm_advanced;
+
+    (void)target;
+
+    if (attacker == 0 || result == 0) {
+        return false;
+    }
+
+    memset(result, 0, sizeof(*result));
+
+    result->can_attack = focgold_can_firearm(&attacker->current_wounds);
+    result->head_shot_allowed = focgold_weapon_can_head_shot(attacker->weapon);
+    result->required_to_hit = focgold_ranged_hit_threshold(range);
+    result->required_head_shot = focgold_ranged_head_shot_threshold(range);
+    if (!result->can_attack || result->required_to_hit == 0) {
+        return true;
+    }
+
+    result->skill_dice = focgold_skill_enabled(attacker->skills.firearm_basic) ? 1 : 0;
+    modifier_dice = focgold_ranged_modifier_dice(modifiers);
+    result->modifier_dice = modifier_dice;
+    dice_count = focgold_ranged_base_dice(range) +
+                 result->skill_dice +
+                 modifier_dice;
+    if (dice_count < 1) {
+        dice_count = 1;
+    }
+    result->dice_count = dice_count;
+    result->dice_total = focgold_roll_d6_sum(dice_count);
+
+    has_firearm_advanced =
+        focgold_skill_enabled(attacker->skills.firearm_advanced);
+    result->shots_fired =
+        focgold_weapon_shots_per_turn(attacker->weapon,
+                                      has_firearm_advanced);
+    result->rounds_spent = result->shots_fired;
+    focgold_resolve_weapon_jam(attacker->weapon, &result->jammed);
+
+    if (called_head_shot && result->head_shot_allowed) {
+        result->head_shot = result->dice_total >= result->required_head_shot;
+        result->hit = result->head_shot;
+    } else {
+        result->hit = result->dice_total >= result->required_to_hit;
+    }
+
+    result->location = result->head_shot ? focgold_hit_head :
+                       result->hit ? focgold_roll_bullet_hit_location() :
+                       focgold_hit_chest;
+    result->wounds_inflicted = result->hit ? 1 : 0;
+
+    return true;
+}
+
 bool focgold_resolve_healing(const focgold_character *healer,
                              const focgold_character *target,
                              focgold_healing_method method,

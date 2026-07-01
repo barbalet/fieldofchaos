@@ -1,6 +1,6 @@
 # Field Of Chaos Gold Rewrite Plan
 
-Current cycle: 31 / 40
+Current cycle: 40 / 40
 
 Source of truth: `pdf/foc-just-the-rules-gold.pdf`
 
@@ -570,13 +570,22 @@ Acceptance criteria:
 - Cycle 29: Bullet and blast hit locations implemented. Forced 3d6 total mapping is exposed for tests: 3-8 legs with odd/even side selection, 9-13 chest, 14-15 abdomen, 16-17 arms with odd/even side selection, and 18 head. Random bullet locations roll 3d6 through that mapping, and Gold blast locations for Shotgun/Grenade use the same 3d6 procedure. Added `src/tests/test_hit_locations.c`.
 - Cycle 30: 2018 inherited melee rules implemented for Gold. Blow threshold is 3 on d6, Weapon threshold is 4 on d6, and 2024 2-6 / 3-6 melee thresholds are not used. Relevant skill modifiers are explicit: Close Combat applies to blows, while Improvised Weapon Use Basic and Clandestine Weapon Use Basic apply to melee weapon attacks. Added melee coverage in `src/tests/test_melee_healing.c`.
 - Cycle 31: Gold healing implemented. No-skill healing rolls 1d6 and recovers on 6; bandage/equipment rolls 1d6 and recovers on 5-6; First Aid rolls 2d6 and uses the highest die; Paramedic rolls 3d6 and uses the highest die. Pharmaceutical Chemistry remains represented as a skill but does not improve healing. Verified with direct `cc -std=c11 -Wall -Wextra -pedantic` builds and runs of `/tmp/focgold_test_dice`, `/tmp/focgold_test_stats`, `/tmp/focgold_test_skills`, `/tmp/focgold_test_weapons`, `/tmp/focgold_test_gold_actions`, `/tmp/focgold_test_wounds`, `/tmp/focgold_test_hit_locations`, and `/tmp/focgold_test_melee_healing`.
+- Cycle 32: Combat foe rule data implemented. Animal head-shot gas, d6+6 gas radius, 2-inch shrink, 2-inch d6-direction drift, Animal +1 attack die, Hunter +1 movement, Soldier 5-6 armor save, Shotgun-as-shot armor treatment, and default Grenade-not-shot armor treatment are exposed in the public API. Added `src/tests/test_foes.c`.
+- Cycle 33: Gold CLI program created at `src/cli/fieldofchaosgold.c`. It links against the static library through the Makefile and can print rule tables plus deterministic `attack`, `blast`, and `heal` examples.
+- Cycle 34: Final `src/Makefile` created. `make` builds `build/libfieldofchaosgold.a` and `build/fieldofchaosgold`; `make lib` builds the static library; `make test` builds and runs all focused C tests; `make clean` removes `src/build`.
+- Cycle 35: Unit and regression coverage completed. Tests cover wounds, ranges, weapons, hit locations, movement, melee, healing, stat caps, Shotgun cone bands, Grenade throw/radius/dud/action economy, Grenade not being a standard firearm, no body-only wound pool, no yard-based rifle range, no 2024 skill advancement side effects, no Pharmaceutical Chemistry healing, no SubMG rewrite, no 2024 ranged thresholds, no grave-condition PH roll, and no winded/chest-body rule. `make test` passes.
+- Cycle 36: Full C verification completed from `src/`. `make clean`, `make`, and `make test` all succeeded. CLI smoke examples succeeded for `tables`, `attack`, `blast`, and `heal`.
+- Cycle 37: Final directory audit completed. No Swift files or Xcode project remain. Active files under `README.md`, `src/`, and `.github/` do not reference retired app workflows or stale active 2018-only names. The 2024 PDFs remain reference-only.
+- Cycle 38: README rewritten for the final Gold C static library and CLI. It names `pdf/foc-just-the-rules-gold.pdf` as source of truth, explains retained 2018 and 2024 PDFs as reference-only, documents the library layout, documents `make`, `make test`, and `make clean`, and includes CLI examples.
+- Cycle 39: Final consistency pass completed. `git status --short` was reviewed during the cycle, active-file `rg` scans found no stale app workflow references, and this plan was updated to reflect the final completed state.
+- Cycle 40: Completion signoff completed. Current cycle is 40 / 40, `make test` passes from `src/`, `README.md` is final for the Gold C-only project shape, retained PDFs are present including `pdf/foc-just-the-rules-gold.pdf`, and no known required cleanup remains.
 
 ## Classification Inventory
 
 | Path | Classification | Notes |
 |---|---|---|
 | `pdf/` | Keep | Contains the Gold source of truth plus retained 2018/2024 reference PDFs. |
-| `src/` | Gold C source in progress | Public Gold header, deterministic dice/seeding, stat caps, stat generation, inherited 2018 skill metadata, Gold weapon/range geometry, ranged modifiers, fire-rate/jam metadata, called head-shot setup, movement, grenade action economy, wound model/effects, hit locations, melee, and healing are implemented. |
+| `src/` | Complete Gold C source | Public Gold header, static library implementation, CLI, Makefile, and focused tests are present. |
 | `docs/` | Removed | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; removed entirely in Cycle 13. |
 | `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
@@ -584,7 +593,7 @@ Acceptance criteria:
 | `UITests/` | Remove | App-level UI tests, outside C-only scope. |
 | `packaging/` | Remove | App bundle packaging assets, outside C-only scope. |
 | `Package.swift` | Remove | Swift package manifest, outside C-only scope. |
-| `README.md` | Rewrite | Must be recreated last for the final Gold C library/CLI shape. |
+| `README.md` | Final | Documents the Gold source of truth, retained reference PDFs, C library layout, Makefile workflow, and CLI examples. |
 | `LICENSE` | Keep | Repository license. |
 | `.github/` | Keep | Funding metadata can remain unless later repository policy says otherwise. |
 | `.gitignore` | Keep | Should be updated later if new C build artifacts require ignore rules. |
@@ -627,11 +636,11 @@ Acceptance criteria:
 | `docs/rules-gap-backlog.md` | Removed | Backlog compares old C prototype to 2024 extracted rules. |
 | `docs/ui-test-suite.md` | Removed | Retired UI test suite documentation. |
 
-## Source Freeze Inventory
+## Source Freeze Inventory (Pre-Rewrite)
 
 | Path | Classification | Notes |
 |---|---|---|
-| `src/Makefile` | Replace later | Builds old direct executables and object file; final Makefile is planned for Cycle 34. |
+| `src/Makefile` | Replaced | Old Makefile was removed with the old source; final Gold Makefile was created in Cycle 34. |
 | `src/fieldofchaos.c` | Replace | Old JSON create/duel CLI tied to the prototype API and `/tmp` examples. |
 | `src/character_create.c` | Replace | Duplicate old character JSON creator CLI. |
 | `src/engine/include/fieldofchaos_engine.h` | Replace | Old public API uses `foc_` names and exposes 2024/playable-app concepts: snapshots, event buffers, board helpers, scenario, AI, campaign, JSON, and Swift-facing types. |
@@ -644,13 +653,13 @@ Acceptance criteria:
 | `src/engine/fieldofchaos_engine.o` | Remove | Compiled object build artifact. |
 | `src/.DS_Store` | Remove | Local filesystem metadata. |
 
-## Old Source Mechanics To Replace
+## Replacement Status
 
-- Character generation and validation currently use the old `foc_generate_stats` flow and a stat total cap of 40; regenerate from `pdf/foc-just-the-rules-gold.pdf`.
+- Character generation and validation were rebuilt from Gold with `focgold_generate_stats`, initial 30-point cap validation, and long-term 40-point cap validation.
 - Wound mechanics were rebuilt in Cycles 27-29 from Gold: explicit 2018 inherited head/chest/abdomen/arms/legs wound pools, wound effects, and 3d6 hit locations with no body-only torso pool, grave PH roll, or winded/chest-body rule.
 - Weapon/range mechanics were rebuilt in Cycles 22-24 from Gold: inherited 2018 firearm ranges plus agreed Shotgun and Grenade rules.
 - Healing mechanics were rebuilt in Cycle 31 from Gold: no-skill, bandage/equipment, First Aid, and Paramedic methods with no Pharmaceutical Chemistry healing improvement.
-- Playable-app systems currently include movement paces, targeting previews, board reload/attack/clear-jam/heal/grenade helpers, scenario generation, AI actions, campaign records, snapshots, event buffers, and JSON-lines event logs; omit unless they are explicitly part of the 2018 core rules library/CLI scope.
+- Retired playable systems remain omitted unless represented by the Gold source of truth; no scenario, campaign, JSON event log, or board UI workflow is active.
 
 ## Current Source Layout
 
@@ -658,16 +667,19 @@ Acceptance criteria:
 |---|---|
 | `src/include/fieldofchaosgold.h` | Public API header for the Gold static library. |
 | `src/include/` | Public headers for the Gold static library. |
-| `src/lib/fieldofchaosgold.c` | Gold rules library implementation in progress through healing. |
+| `src/lib/fieldofchaosgold.c` | Gold static library implementation. |
 | `src/lib/fieldofchaosgold_internal.h` | Internal helpers for multi-die rolling. |
 | `src/lib/` | C implementation files for the Gold rules library. |
-| `src/cli/` | C command-line program source. |
-| `src/tests/test_dice.c` | Focused dice/seeding tests until the full test suite and Makefile are created. |
-| `src/tests/test_stats.c` | Focused stats and character-generation tests until the full test suite and Makefile are created. |
-| `src/tests/test_skills.c` | Focused skill metadata and hierarchy tests until the full test suite and Makefile are created. |
+| `src/cli/fieldofchaosgold.c` | Gold CLI rule tables and deterministic examples. |
+| `src/Makefile` | Builds `build/libfieldofchaosgold.a`, `build/fieldofchaosgold`, and all focused tests. |
+| `src/tests/test_dice.c` | Focused dice/seeding tests. |
+| `src/tests/test_stats.c` | Focused stats and character-generation tests. |
+| `src/tests/test_skills.c` | Focused skill metadata and hierarchy tests. |
 | `src/tests/test_weapons.c` | Focused Gold weapon, range, Shotgun, Grenade, fire-rate, jam, and reliability tests. |
 | `src/tests/test_gold_actions.c` | Focused Gold ranged modifier, called head-shot, movement, and grenade action-economy tests. |
 | `src/tests/test_wounds.c` | Focused Gold wound model and wound effect tests. |
 | `src/tests/test_hit_locations.c` | Focused Gold bullet/blast hit-location tests. |
 | `src/tests/test_melee_healing.c` | Focused Gold melee and healing tests. |
+| `src/tests/test_foes.c` | Focused Gold combat foe rule-data tests. |
+| `src/tests/test_regressions.c` | Focused regression tests against unwanted 2024 behavior. |
 | `src/tests/` | C test source for the Gold rules library and CLI. |

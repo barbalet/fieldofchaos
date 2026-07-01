@@ -126,6 +126,19 @@ typedef enum focgold_target_movement {
     focgold_target_movement_fast
 } focgold_target_movement;
 
+typedef enum focgold_foe_type {
+    focgold_foe_animal = 0,
+    focgold_foe_hunter,
+    focgold_foe_soldier
+} focgold_foe_type;
+
+typedef enum focgold_damage_source {
+    focgold_damage_bullet = 0,
+    focgold_damage_shotgun,
+    focgold_damage_grenade,
+    focgold_damage_melee
+} focgold_damage_source;
+
 typedef struct focgold_damage_roll {
     int dice_count;
     int die_sides;
@@ -326,6 +339,20 @@ int focgold_melee_skill_modifier_dice(const focgold_skills *skills,
 int focgold_healing_dice_count(focgold_healing_method method);
 int focgold_healing_required_to_recover(focgold_healing_method method);
 bool focgold_healing_uses_highest_die(focgold_healing_method method);
+
+bool focgold_animal_head_shot_releases_gas(void);
+int focgold_animal_gas_initial_radius_inches(void);
+int focgold_animal_gas_shrink_per_turn_inches(void);
+int focgold_animal_gas_drift_inches_per_turn(void);
+int focgold_animal_gas_drift_direction(void);
+int focgold_foe_attack_modifier_dice(focgold_foe_type foe);
+int focgold_foe_movement_modifier_inches(focgold_foe_type foe);
+int focgold_soldier_armor_save_threshold(void);
+bool focgold_damage_counts_as_shot_for_armor(focgold_damage_source source,
+                                             bool referee_counts_grenade);
+bool focgold_resolve_soldier_armor_save(focgold_damage_source source,
+                                        bool referee_counts_grenade,
+                                        bool *saved);
 
 bool focgold_resolve_ranged_attack(const focgold_character *attacker,
                                    const focgold_character *target,

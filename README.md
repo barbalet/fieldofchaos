@@ -1,37 +1,48 @@
 # fieldofchaos
 
-Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a focus on producing and reviewing a C-language implementation of the rules.
+C implementation of the Field of Chaos Gold rules subset.
 
-## Rewrite Status
+## Rules Source
 
-This repository is being rewritten around `pdf/foc-just-the-rules-gold.pdf` as the source of truth. Gold keeps the 2018 core rules and adds the agreed Shotgun and Grenade rules adapted from 2024. The Swift, Xcode, and macOS app workflow has been retired.
+The source of truth is `pdf/foc-just-the-rules-gold.pdf`.
 
-## Rules Sources
+Gold keeps the 2018 core rules and adds the agreed Shotgun and Grenade rules adapted from the newer rules set. The retained PDFs below are reference-only:
 
-- Canonical source PDF: `pdf/foc-just-the-rules-gold.pdf`
-- Reference-only 2018 rules PDF: `pdf/foc-just-the-rules-2018.pdf`
-- Reference-only newer PDF: `pdf/foc-just-the-rules-2024.pdf`
-- Reference-only full newer PDF: `pdf/field-of-chaos-rpg-070524.pdf`
-- Reference-only full 2018 PDF: `pdf/foc_rpg_051018.pdf`
+- `pdf/foc-just-the-rules-2018.pdf`
+- `pdf/foc-just-the-rules-2024.pdf`
+- `pdf/field-of-chaos-rpg-070524.pdf`
+- `pdf/foc_rpg_051018.pdf`
 
-## Project Aim
+## Layout
 
-- Build a C-language program version of the game rules for validation, review, and debugging.
-- Keep source material traceable back to the original PDF while maintaining implementation-friendly Markdown documentation.
-- Replace the prior playable SwiftUI/Metal/C app direction with a Gold-focused C static library and C program.
-- Track the current rewrite in `PLAN.md`.
+- `src/include/fieldofchaosgold.h`: public C API
+- `src/lib/fieldofchaosgold.c`: rules implementation
+- `src/lib/fieldofchaosgold_internal.h`: internal dice helpers
+- `src/cli/fieldofchaosgold.c`: command-line examples and rule tables
+- `src/tests/`: focused C test programs
+- `PLAN.md`: completed 40-cycle rewrite record
 
-## Architecture
+## Build
 
-- Public C API headers: `src/include/`
-- Static library implementation: `src/lib/`
-- C command-line program source: `src/cli/`
-- C tests: `src/tests/`
+Run commands from `src/`:
 
-## Retired App Workflow
+```sh
+cd src
+make
+make test
+make clean
+```
 
-The prior Swift package, Xcode project, app packaging, and UI-test workflows are no longer active project workflows. The README will be rewritten near the end of the 40-cycle plan for the final C-only project shape.
+`make lib` builds `build/libfieldofchaosgold.a`. `make` builds both the static library and `build/fieldofchaosgold`.
 
-## C Source Status
+## CLI Examples
 
-The old prototype source has been removed. The new Gold-focused C header, library, CLI, tests, and Makefile will be recreated by the remaining development cycles.
+```sh
+cd src
+./build/fieldofchaosgold tables
+./build/fieldofchaosgold attack
+./build/fieldofchaosgold blast
+./build/fieldofchaosgold heal
+```
+
+The CLI prints deterministic examples for rule-table review, ranged attacks, Shotgun/Grenade blast handling, and healing.
