@@ -5,8 +5,6 @@ Source of truth: `pdf/foc-just-the-rules-gold.pdf`
 Status legend:
 
 - Implemented: represented by the C static library and covered by tests or CLI output.
-- Partial: represented as metadata or a roll result, but not yet as complete state mutation or turn resolution.
-- Planned: assigned to a remaining development cycle.
 - Out of scope: deliberately not represented in the C rules library.
 
 ## Section Coverage
@@ -17,11 +15,11 @@ Status legend:
 | 1 | Skill accounting, one skill per stat point | `focgold_skill_count_for_stat`, `focgold_validate_character_skills` | `test_skills` | Implemented in Cycle 44 |
 | 2 | Skill hierarchy and prerequisites | `focgold_skill_stat`, `focgold_skill_prerequisites`, `focgold_validate_skill_prerequisites` | `test_skills` | Implemented in Cycle 44 |
 | 3 | Ranged weapons, ranges, thresholds, modifiers | weapon/range/modifier helpers and ranged resolver | `test_weapons`, `test_gold_actions`, CLI `attack` | Implemented through Cycle 43 |
-| 4 | Shotgun and Grenade Gold rules | geometry helpers, reliability, area resolvers | `test_weapons`, `test_area_effects`, CLI `blast` metadata | Implemented through Cycle 46; CLI expansion planned Cycle 51 |
+| 4 | Shotgun and Grenade Gold rules | geometry helpers, reliability, area resolvers, CLI examples | `test_weapons`, `test_area_effects`, CLI `shotgun`, `grenade`, and `blast` | Implemented |
 | 5 | Movement and grenade action economy | movement helpers and turn permissions | `test_gold_actions` | Implemented through Cycle 43 |
-| 6 | Wounds, hit locations, melee | wound pools, status helpers, hit location helpers, melee resolver | `test_wounds`, `test_hit_locations`, `test_melee_healing` | Partial; melee skill dice parity planned Cycle 48 and damage application planned Cycle 47 |
-| 7 | Healing | healing roll metadata and resolver | `test_melee_healing`, CLI `heal` | Partial; target wound mutation planned Cycle 49 |
-| 8 | Special weapon and foe rules | reload/jam/called-head-shot/foe metadata, soldier armor helper | `test_weapons`, `test_gold_actions`, `test_foes` | Partial; full foe/action integration planned Cycle 50 |
+| 6 | Wounds, hit locations, melee | wound pools, status helpers, hit location helpers, wound mutation, melee resolver | `test_wounds`, `test_hit_locations`, `test_melee_healing`, CLI `wounds`, `locations`, and `melee` | Implemented |
+| 7 | Healing | healing roll metadata, resolver, and target wound mutation | `test_melee_healing`, CLI `healing` and `heal` | Implemented |
+| 8 | Special weapon and foe rules | reload/jam/called-head-shot/foe helpers, soldier armor wound integration | `test_weapons`, `test_gold_actions`, `test_foes`, CLI `foes` and `armor` | Implemented |
 | 9 | Explicit 2024 exclusions | regression tests for excluded 2024 rules | `test_regressions` | Implemented |
 
 ## Character Generation And Stats
@@ -83,8 +81,8 @@ Status legend:
 | Automatic two shots, Standard, jam on 1 on 2d6, no head shot | fire rate, movement, jam, head-shot helpers | Implemented | 43 |
 | SubMG three shots, Fast, jam on 1 on 1d6, no head shot | fire rate, movement, jam, head-shot helpers | Implemented | 43 |
 | Shotgun one cone attack, Basic Firearm, referee movement note | shotgun metadata and referee movement flag | Implemented | 43 |
-| Ammunition mutation, reload state, jam-clearing state | metadata present, no turn-state mutation | Partial | 50 |
-| Called head-shot two-move turn state | readiness metadata present, no full turn-state machine | Partial | 50 |
+| Ammunition mutation, reload state, jam-clearing state | `focgold_apply_ranged_attack_ammo`, `focgold_reload_character`, `focgold_clear_jam_state` | Implemented | 50 |
+| Called head-shot two-move turn state | `focgold_called_head_shot_progress_after_turn`, readiness, and miss helpers | Implemented | 50 |
 
 ## Shotgun
 
@@ -97,7 +95,7 @@ Status legend:
 | Damage only nearest occupied cone band | `focgold_resolve_shotgun_area` | Implemented | 45 |
 | Include allies in affected targets | `focgold_area_target.ally`, `focgold_area_damage.ally` | Implemented | 45 |
 | Each wound gets normal 3d6 hit location | area resolver and hit location helper | Implemented | 45 |
-| Apply wounds to character wound pools | not yet state-mutating | Planned | 47 |
+| Apply wounds to character wound pools | `focgold_apply_area_damage_to_wounds` | Implemented | 47 |
 
 ## Grenade
 
@@ -115,7 +113,7 @@ Status legend:
 | Each wound gets normal 3d6 hit location | area resolver and hit location helper | Implemented | 46 |
 | One grenade halves movement, rounded down | movement helper | Implemented | 26 |
 | Stationary two grenades consumes turn | turn permissions helper | Implemented | 26 |
-| Apply wounds to character wound pools | not yet state-mutating | Planned | 47 |
+| Apply wounds to character wound pools | `focgold_apply_area_damage_to_wounds` | Implemented | 47 |
 
 ## Movement
 
@@ -151,7 +149,7 @@ Status legend:
 | 14-15 abdomen | hit location helper | Implemented | 29 |
 | 16-17 arm, odd left even right | hit location helper | Implemented | 29 |
 | 18 head | hit location helper | Implemented | 29 |
-| Mutate wound pools from resolved damage | not yet implemented | Planned | 47 |
+| Mutate wound pools from resolved damage | `focgold_apply_wounds`, `focgold_apply_area_damage_to_wounds` | Implemented | 47 |
 
 ## Melee
 
@@ -159,10 +157,10 @@ Status legend:
 | --- | --- | --- | --- |
 | Blow hits on 3-6 | melee threshold and resolver | Implemented | 30 |
 | Blow base 1d6 | melee resolver | Implemented | 30 |
-| Blow +1/+2 skill dice | current helper can add dice, but parity needs explicit +0/+1/+2 API | Partial | 48 |
+| Blow +1/+2 skill dice | `focgold_melee_base_dice`, `focgold_melee_skill_dice`, melee result `skill_dice` | Implemented | 48 |
 | Weapon hits on 4-6 | melee threshold and resolver | Implemented | 30 |
 | Weapon base 1d6 | melee resolver | Implemented | 30 |
-| Weapon +1/+2 skill dice | current helper can add dice, but parity needs explicit +0/+1/+2 API | Partial | 48 |
+| Weapon +1/+2 skill dice | `focgold_melee_base_dice`, `focgold_melee_skill_dice`, melee result `skill_dice` | Implemented | 48 |
 
 ## Healing
 
@@ -172,8 +170,8 @@ Status legend:
 | Bandage/equipment recovers on 5-6 | healing resolver | Implemented as roll result | 31 |
 | First Aid rolls 2d6, use highest die | healing resolver | Implemented as roll result | 31 |
 | Paramedic rolls 3d6, use highest die | healing resolver | Implemented as roll result | 31 |
-| Successful healing restores one wound to a target pool | not yet state-mutating | Planned | 49 |
-| Healing cannot exceed maximum wounds | not yet state-mutating | Planned | 49 |
+| Successful healing restores one wound to a target pool | `focgold_apply_healing_result`, `focgold_apply_healing_result_to_location` | Implemented | 49 |
+| Healing cannot exceed maximum wounds | `focgold_recover_wound` and healing application helpers clamp at maximum | Implemented | 49 |
 | Pharmaceutical Chemistry has no healing effect | skill/healing metadata | Implemented | 31 |
 
 ## Special Rules And Foes
@@ -181,20 +179,20 @@ Status legend:
 | PDF row/rule | C/API coverage | Status | Assigned cycle |
 | --- | --- | --- | --- |
 | Clip size 10 | public constant | Implemented | 24 |
-| Changing clip takes one turn | public constant/helper | Implemented as metadata | 24 |
-| Clearing jam takes one turn | public constant/helper | Implemented as metadata | 24 |
+| Changing clip takes one turn | public constant/helper plus `focgold_reload_character` | Implemented | 50 |
+| Clearing jam takes one turn | public constant/helper plus `focgold_clear_jam_state` | Implemented | 50 |
 | Automatic/SubMG jam checks | jam helpers | Implemented | 24 |
-| Called head shot requires two moves and misses entirely on miss | called-head-shot helpers | Partial; full action state planned | 50 |
-| Animal head shot releases Psychnosis Gas | foe metadata | Implemented as metadata | 32 |
-| Animal head shot only succeeds on 5-6 on d6 | not yet represented | Planned | 50 |
-| Animal gas attack double rolls and half movement | not yet represented | Planned | 50 |
-| Animal gas cloud d6+6 radius, shrink 2, drift 2 in d6 direction | foe helpers | Implemented as metadata | 32 |
-| Animal gets +1 die on all attacks | foe attack modifier helper | Implemented as metadata | 32 |
-| Hunter +1 movement | foe movement modifier helper | Partial; movement integration planned | 50 |
-| Soldier armor save 5-6 | armor helper | Implemented as metadata | 32 |
-| Shotgun counts for Soldier armor | armor source helper | Implemented as metadata | 32 |
-| Grenade does not count for Soldier armor unless referee says so | armor source helper | Implemented as metadata | 32 |
-| Integrate Soldier armor with wound resolution | not yet state-mutating | Planned | 50 |
+| Called head shot requires two moves and misses entirely on miss | called-head-shot progress, readiness, and miss helpers | Implemented | 50 |
+| Animal head shot releases Psychnosis Gas | foe helper | Implemented | 32 |
+| Animal head shot only succeeds on 5-6 on d6 | `focgold_resolve_animal_head_shot` | Implemented | 50 |
+| Animal gas attack double rolls and half movement | gas attack roll-count and movement helpers | Implemented | 50 |
+| Animal gas cloud d6+6 radius, shrink 2, drift 2 in d6 direction | foe helpers | Implemented | 32 |
+| Animal gets +1 die on all attacks | foe attack modifier helper | Implemented | 32 |
+| Hunter +1 movement | `focgold_foe_movement_inches` | Implemented | 50 |
+| Soldier armor save 5-6 | armor helper | Implemented | 32 |
+| Shotgun counts for Soldier armor | armor source helper and integrated damage helper | Implemented | 50 |
+| Grenade does not count for Soldier armor unless referee says so | armor source helper and integrated damage helper | Implemented | 50 |
+| Integrate Soldier armor with wound resolution | `focgold_apply_damage_with_soldier_armor` | Implemented | 50 |
 
 ## Exclusions
 

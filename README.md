@@ -1,6 +1,6 @@
 # fieldofchaos
 
-C implementation of the Field of Chaos Gold rules subset.
+C implementation of the Field of Chaos Gold rules.
 
 ## Rules Source
 
@@ -20,7 +20,7 @@ Gold keeps the 2018 core rules and adds the agreed Shotgun and Grenade rules ada
 - `src/lib/fieldofchaosgold_internal.h`: internal dice helpers
 - `src/cli/fieldofchaosgold.c`: command-line examples and rule tables
 - `src/tests/`: focused C test programs
-- `PLAN.md`: completed 40-cycle rewrite record
+- `TRACEABILITY.md`: Gold PDF to C/API/test parity matrix
 
 ## Build
 
@@ -39,10 +39,23 @@ make clean
 
 ```sh
 cd src
+./build/fieldofchaosgold stats
+./build/fieldofchaosgold skills
+./build/fieldofchaosgold weapons
+./build/fieldofchaosgold shotgun
+./build/fieldofchaosgold grenade
+./build/fieldofchaosgold movement
+./build/fieldofchaosgold wounds
+./build/fieldofchaosgold locations
+./build/fieldofchaosgold melee
+./build/fieldofchaosgold healing
+./build/fieldofchaosgold foes
 ./build/fieldofchaosgold tables
 ./build/fieldofchaosgold attack
 ./build/fieldofchaosgold blast
 ./build/fieldofchaosgold heal
+./build/fieldofchaosgold armor
+./build/fieldofchaosgold all
 ```
 
-The CLI prints deterministic examples for rule-table review, ranged attacks, Shotgun/Grenade blast handling, and healing.
+The CLI prints Gold rule tables for stats, skill hierarchy and accounting, weapons, Shotgun, Grenade, movement, wounds, hit locations, melee, healing, and foes. It also prints deterministic examples for ranged attacks, Shotgun area resolution, Grenade area resolution, melee, healing application, and Soldier armor.

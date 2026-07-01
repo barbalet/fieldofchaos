@@ -93,6 +93,18 @@ static void test_called_head_shots(void) {
                 "called head shot should remain ready after more than two moves");
     expect_true(focgold_called_head_shot_miss_is_total_miss(),
                 "missed called head shots should miss altogether");
+    expect_int(focgold_called_head_shot_progress_after_turn(0, true),
+               1,
+               "called head shot setup should progress after a setup move");
+    expect_int(focgold_called_head_shot_progress_after_turn(1, true),
+               2,
+               "called head shot setup should reach ready after two setup moves");
+    expect_int(focgold_called_head_shot_progress_after_turn(2, true),
+               2,
+               "called head shot setup should clamp at ready state");
+    expect_int(focgold_called_head_shot_progress_after_turn(1, false),
+               0,
+               "turns not spent setting up should reset called head shot progress");
 }
 
 static focgold_wounds mobile_wounds(void) {
@@ -266,12 +278,51 @@ static void test_grenade_action_economy(void) {
                 "two-grenade turn should prevent called-head-shot progress");
 }
 
+static void test_ammo_reload_and_jam_state(void) {
+    focgold_character character = {0};
+    focgold_attack_result attack = {0};
+    bool jammed = true;
+
+    character.rounds_in_clip = 5;
+    character.clips = 2;
+    attack.rounds_spent = 2;
+    expect_true(focgold_apply_ranged_attack_ammo(&character, &attack),
+                "attack ammo spending should apply");
+    expect_int(character.rounds_in_clip,
+               3,
+               "attack ammo spending should subtract rounds");
+
+    attack.rounds_spent = 4;
+    expect_true(!focgold_apply_ranged_attack_ammo(&character, &attack),
+                "overspending ammo should fail");
+    expect_int(character.rounds_in_clip,
+               0,
+               "overspending ammo should clamp clip at zero");
+
+    expect_true(focgold_reload_character(&character),
+                "reload should use one spare clip");
+    expect_int(character.rounds_in_clip,
+               focgold_standard_clip_rounds,
+               "reload should fill the weapon clip");
+    expect_int(character.clips,
+               1,
+               "reload should consume one spare clip");
+
+    expect_true(focgold_clear_jam_state(&jammed),
+                "jam clearing state helper should resolve");
+    expect_true(!jammed,
+                "jam clearing should clear jam state");
+    expect_true(!focgold_clear_jam_state(0),
+                "missing jam state output should fail");
+}
+
 int main(void) {
     test_ranged_modifiers();
     test_called_head_shots();
     test_movement();
     test_weapon_movement_rules();
     test_grenade_action_economy();
+    test_ammo_reload_and_jam_state();
 
     if (failures != 0) {
         fprintf(stderr, "%d failure(s)\n", failures);

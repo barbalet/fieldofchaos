@@ -240,6 +240,7 @@ typedef struct focgold_attack_result {
 typedef struct focgold_melee_result {
     bool hit;
     int dice_count;
+    int skill_dice;
     int dice_total;
     int required_to_hit;
     focgold_hit_location location;
@@ -314,6 +315,10 @@ int focgold_weapon_jam_threshold(focgold_weapon weapon);
 bool focgold_resolve_weapon_jam(focgold_weapon weapon, bool *jammed);
 int focgold_reload_turn_count(void);
 int focgold_clear_jam_turn_count(void);
+bool focgold_apply_ranged_attack_ammo(focgold_character *attacker,
+                                      const focgold_attack_result *result);
+bool focgold_reload_character(focgold_character *character);
+bool focgold_clear_jam_state(bool *jammed);
 
 int focgold_shotgun_total_length_inches(void);
 int focgold_shotgun_band_max_inches(focgold_shotgun_band band);
@@ -356,6 +361,8 @@ int focgold_ranged_modifier_dice(const focgold_attack_modifiers *modifiers);
 int focgold_called_head_shot_required_setup_moves(void);
 bool focgold_called_head_shot_ready(int moves_declared_before_firing);
 bool focgold_called_head_shot_miss_is_total_miss(void);
+int focgold_called_head_shot_progress_after_turn(int moves_declared_before_firing,
+                                                 bool spent_setup_move);
 
 int focgold_movement_inches(focgold_movement_pace pace,
                             const focgold_skills *skills,
@@ -368,6 +375,21 @@ focgold_turn_permissions focgold_two_grenade_turn_permissions(void);
 
 void focgold_default_wounds(focgold_wounds *wounds);
 int focgold_total_wounds(const focgold_wounds *wounds);
+int focgold_wound_value(const focgold_wounds *wounds,
+                        focgold_hit_location location);
+bool focgold_apply_wounds(focgold_wounds *wounds,
+                          focgold_hit_location location,
+                          int wounds_inflicted);
+bool focgold_apply_area_damage_to_wounds(focgold_wounds *wounds,
+                                         const focgold_area_damage *damage);
+bool focgold_recover_wound(focgold_wounds *current,
+                           const focgold_wounds *maximum,
+                           focgold_hit_location location);
+bool focgold_apply_healing_result(focgold_character *target,
+                                  const focgold_healing_result *result);
+bool focgold_apply_healing_result_to_location(focgold_character *target,
+                                              const focgold_healing_result *result,
+                                              focgold_hit_location location);
 bool focgold_is_unconscious(const focgold_wounds *wounds);
 bool focgold_is_grave_condition(const focgold_wounds *wounds);
 bool focgold_is_dead(const focgold_wounds *wounds);
@@ -377,9 +399,12 @@ focgold_hit_location focgold_roll_bullet_hit_location(void);
 focgold_hit_location focgold_roll_blast_hit_location(void);
 const char *focgold_hit_location_name(focgold_hit_location location);
 
+int focgold_melee_base_dice(focgold_melee_attack attack);
 int focgold_melee_hit_threshold(focgold_melee_attack attack);
 bool focgold_melee_skill_applies(focgold_melee_attack attack,
                                  focgold_skill_id skill);
+int focgold_melee_skill_dice(const focgold_skills *skills,
+                             focgold_melee_attack attack);
 int focgold_melee_skill_modifier_dice(const focgold_skills *skills,
                                       focgold_melee_attack attack);
 
@@ -388,18 +413,36 @@ int focgold_healing_required_to_recover(focgold_healing_method method);
 bool focgold_healing_uses_highest_die(focgold_healing_method method);
 
 bool focgold_animal_head_shot_releases_gas(void);
+int focgold_animal_head_shot_success_threshold(void);
+bool focgold_resolve_animal_head_shot(bool attack_hit_head,
+                                      bool *head_shot_success);
+int focgold_animal_gas_attack_required_rolls(void);
+bool focgold_animal_gas_attack_halves_movement(void);
+int focgold_animal_gas_attack_movement_inches(focgold_movement_pace pace,
+                                              const focgold_skills *skills,
+                                              const focgold_wounds *wounds);
 int focgold_animal_gas_initial_radius_inches(void);
 int focgold_animal_gas_shrink_per_turn_inches(void);
 int focgold_animal_gas_drift_inches_per_turn(void);
 int focgold_animal_gas_drift_direction(void);
 int focgold_foe_attack_modifier_dice(focgold_foe_type foe);
 int focgold_foe_movement_modifier_inches(focgold_foe_type foe);
+int focgold_foe_movement_inches(focgold_foe_type foe,
+                                focgold_movement_pace pace,
+                                const focgold_skills *skills,
+                                const focgold_wounds *wounds);
 int focgold_soldier_armor_save_threshold(void);
 bool focgold_damage_counts_as_shot_for_armor(focgold_damage_source source,
                                              bool referee_counts_grenade);
 bool focgold_resolve_soldier_armor_save(focgold_damage_source source,
                                         bool referee_counts_grenade,
                                         bool *saved);
+bool focgold_apply_damage_with_soldier_armor(focgold_wounds *wounds,
+                                             focgold_damage_source source,
+                                             bool referee_counts_grenade,
+                                             focgold_hit_location location,
+                                             int wounds_inflicted,
+                                             bool *saved);
 
 bool focgold_resolve_ranged_attack(const focgold_character *attacker,
                                    const focgold_character *target,

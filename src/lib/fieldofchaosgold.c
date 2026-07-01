@@ -1102,6 +1102,40 @@ int focgold_clear_jam_turn_count(void) {
     return focgold_clear_jam_turns;
 }
 
+bool focgold_apply_ranged_attack_ammo(focgold_character *attacker,
+                                      const focgold_attack_result *result) {
+    if (attacker == 0 || result == 0 || result->rounds_spent < 0) {
+        return false;
+    }
+
+    if (result->rounds_spent > attacker->rounds_in_clip) {
+        attacker->rounds_in_clip = 0;
+        return false;
+    }
+
+    attacker->rounds_in_clip -= result->rounds_spent;
+    return true;
+}
+
+bool focgold_reload_character(focgold_character *character) {
+    if (character == 0 || character->clips <= 0) {
+        return false;
+    }
+
+    character->clips--;
+    character->rounds_in_clip = focgold_standard_clip_rounds;
+    return true;
+}
+
+bool focgold_clear_jam_state(bool *jammed) {
+    if (jammed == 0) {
+        return false;
+    }
+
+    *jammed = false;
+    return true;
+}
+
 int focgold_called_head_shot_required_setup_moves(void) {
     return focgold_called_head_shot_setup_moves;
 }
@@ -1112,6 +1146,25 @@ bool focgold_called_head_shot_ready(int moves_declared_before_firing) {
 
 bool focgold_called_head_shot_miss_is_total_miss(void) {
     return true;
+}
+
+int focgold_called_head_shot_progress_after_turn(int moves_declared_before_firing,
+                                                 bool spent_setup_move) {
+    int progress;
+
+    if (moves_declared_before_firing < 0) {
+        return 0;
+    }
+    if (!spent_setup_move) {
+        return 0;
+    }
+
+    progress = moves_declared_before_firing + 1;
+    if (progress > focgold_called_head_shot_setup_moves) {
+        progress = focgold_called_head_shot_setup_moves;
+    }
+
+    return progress;
 }
 
 static int focgold_skill_enabled(int skill_value) {
@@ -1219,6 +1272,123 @@ void focgold_default_wounds(focgold_wounds *wounds) {
     wounds->right_leg = 2;
 }
 
+static int *focgold_wound_slot(focgold_wounds *wounds,
+                               focgold_hit_location location) {
+    if (wounds == 0) {
+        return 0;
+    }
+
+    switch (location) {
+    case focgold_hit_left_leg:
+        return &wounds->left_leg;
+    case focgold_hit_right_leg:
+        return &wounds->right_leg;
+    case focgold_hit_chest:
+        return &wounds->chest;
+    case focgold_hit_abdomen:
+        return &wounds->abdomen;
+    case focgold_hit_left_arm:
+        return &wounds->left_arm;
+    case focgold_hit_right_arm:
+        return &wounds->right_arm;
+    case focgold_hit_head:
+        return &wounds->head;
+    }
+
+    return 0;
+}
+
+int focgold_wound_value(const focgold_wounds *wounds,
+                        focgold_hit_location location) {
+    focgold_wounds *mutable_wounds = (focgold_wounds *)wounds;
+    int *slot = focgold_wound_slot(mutable_wounds, location);
+
+    return slot == 0 ? 0 : *slot;
+}
+
+bool focgold_apply_wounds(focgold_wounds *wounds,
+                          focgold_hit_location location,
+                          int wounds_inflicted) {
+    int *slot = focgold_wound_slot(wounds, location);
+
+    if (slot == 0 || wounds_inflicted < 0) {
+        return false;
+    }
+
+    if (wounds_inflicted >= *slot) {
+        *slot = 0;
+    } else {
+        *slot -= wounds_inflicted;
+    }
+
+    return true;
+}
+
+bool focgold_apply_area_damage_to_wounds(focgold_wounds *wounds,
+                                         const focgold_area_damage *damage) {
+    int index;
+
+    if (wounds == 0 || damage == 0 || damage->wounds_inflicted < 0) {
+        return false;
+    }
+    if (!damage->affected) {
+        return true;
+    }
+
+    for (index = 0;
+         index < damage->wounds_inflicted && index < focgold_area_max_wounds;
+         index++) {
+        if (!focgold_apply_wounds(wounds, damage->hit_locations[index], 1)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool focgold_recover_wound(focgold_wounds *current,
+                           const focgold_wounds *maximum,
+                           focgold_hit_location location) {
+    int *current_slot = focgold_wound_slot(current, location);
+    int maximum_value = focgold_wound_value(maximum, location);
+
+    if (current_slot == 0 || maximum == 0 || maximum_value < 0) {
+        return false;
+    }
+    if (*current_slot >= maximum_value) {
+        return false;
+    }
+
+    (*current_slot)++;
+    return true;
+}
+
+bool focgold_apply_healing_result_to_location(focgold_character *target,
+                                              const focgold_healing_result *result,
+                                              focgold_hit_location location) {
+    if (target == 0 || result == 0) {
+        return false;
+    }
+    if (!result->recovered || result->wounds_recovered <= 0) {
+        return true;
+    }
+
+    return focgold_recover_wound(&target->current_wounds,
+                                 &target->maximum_wounds,
+                                 location);
+}
+
+bool focgold_apply_healing_result(focgold_character *target,
+                                  const focgold_healing_result *result) {
+    if (result == 0) {
+        return false;
+    }
+
+    return focgold_apply_healing_result_to_location(target,
+                                                    result,
+                                                    result->location);
+}
+
 int focgold_total_wounds(const focgold_wounds *wounds) {
     if (wounds == 0) {
         return 0;
@@ -1307,6 +1477,16 @@ const char *focgold_hit_location_name(focgold_hit_location location) {
     return names[location];
 }
 
+int focgold_melee_base_dice(focgold_melee_attack attack) {
+    switch (attack) {
+    case focgold_melee_blow:
+    case focgold_melee_weapon:
+        return 1;
+    }
+
+    return 0;
+}
+
 int focgold_melee_hit_threshold(focgold_melee_attack attack) {
     switch (attack) {
     case focgold_melee_blow:
@@ -1331,8 +1511,8 @@ bool focgold_melee_skill_applies(focgold_melee_attack attack,
     return false;
 }
 
-int focgold_melee_skill_modifier_dice(const focgold_skills *skills,
-                                      focgold_melee_attack attack) {
+int focgold_melee_skill_dice(const focgold_skills *skills,
+                             focgold_melee_attack attack) {
     int modifier = 0;
 
     if (skills == 0) {
@@ -1355,6 +1535,11 @@ int focgold_melee_skill_modifier_dice(const focgold_skills *skills,
     return modifier;
 }
 
+int focgold_melee_skill_modifier_dice(const focgold_skills *skills,
+                                      focgold_melee_attack attack) {
+    return focgold_melee_skill_dice(skills, attack);
+}
+
 bool focgold_resolve_melee(const focgold_character *attacker,
                            focgold_melee_attack attack,
                            focgold_melee_result *result) {
@@ -1371,9 +1556,8 @@ bool focgold_resolve_melee(const focgold_character *attacker,
         return false;
     }
 
-    result->dice_count = 1 +
-                         focgold_melee_skill_modifier_dice(&attacker->skills,
-                                                           attack);
+    result->skill_dice = focgold_melee_skill_dice(&attacker->skills, attack);
+    result->dice_count = focgold_melee_base_dice(attack) + result->skill_dice;
     result->dice_total = focgold_roll_d6_sum(result->dice_count);
     result->required_to_hit = threshold;
     result->hit = result->dice_total >= threshold;
@@ -1420,6 +1604,40 @@ bool focgold_animal_head_shot_releases_gas(void) {
     return true;
 }
 
+int focgold_animal_head_shot_success_threshold(void) {
+    return 5;
+}
+
+bool focgold_resolve_animal_head_shot(bool attack_hit_head,
+                                      bool *head_shot_success) {
+    if (head_shot_success == 0) {
+        return false;
+    }
+
+    if (!attack_hit_head) {
+        *head_shot_success = false;
+        return true;
+    }
+
+    *head_shot_success =
+        focgold_roll_d6() >= focgold_animal_head_shot_success_threshold();
+    return true;
+}
+
+int focgold_animal_gas_attack_required_rolls(void) {
+    return 2;
+}
+
+bool focgold_animal_gas_attack_halves_movement(void) {
+    return true;
+}
+
+int focgold_animal_gas_attack_movement_inches(focgold_movement_pace pace,
+                                              const focgold_skills *skills,
+                                              const focgold_wounds *wounds) {
+    return focgold_movement_inches(pace, skills, wounds) / 2;
+}
+
 int focgold_animal_gas_initial_radius_inches(void) {
     return focgold_roll_d6() + 6;
 }
@@ -1442,6 +1660,19 @@ int focgold_foe_attack_modifier_dice(focgold_foe_type foe) {
 
 int focgold_foe_movement_modifier_inches(focgold_foe_type foe) {
     return foe == focgold_foe_hunter ? 1 : 0;
+}
+
+int focgold_foe_movement_inches(focgold_foe_type foe,
+                                focgold_movement_pace pace,
+                                const focgold_skills *skills,
+                                const focgold_wounds *wounds) {
+    int movement = focgold_movement_inches(pace, skills, wounds);
+
+    if (movement <= 0) {
+        return movement;
+    }
+
+    return movement + focgold_foe_movement_modifier_inches(foe);
 }
 
 int focgold_soldier_armor_save_threshold(void) {
@@ -1478,6 +1709,32 @@ bool focgold_resolve_soldier_armor_save(focgold_damage_source source,
 
     *saved = focgold_roll_d6() >= focgold_soldier_armor_save_threshold();
     return true;
+}
+
+bool focgold_apply_damage_with_soldier_armor(focgold_wounds *wounds,
+                                             focgold_damage_source source,
+                                             bool referee_counts_grenade,
+                                             focgold_hit_location location,
+                                             int wounds_inflicted,
+                                             bool *saved) {
+    bool armor_saved = false;
+
+    if (wounds == 0 || saved == 0 || wounds_inflicted < 0) {
+        return false;
+    }
+
+    if (!focgold_resolve_soldier_armor_save(source,
+                                            referee_counts_grenade,
+                                            &armor_saved)) {
+        return false;
+    }
+
+    *saved = armor_saved;
+    if (armor_saved) {
+        return true;
+    }
+
+    return focgold_apply_wounds(wounds, location, wounds_inflicted);
 }
 
 bool focgold_resolve_ranged_attack(const focgold_character *attacker,
