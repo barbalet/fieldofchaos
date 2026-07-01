@@ -1,6 +1,6 @@
 # Field Of Chaos 2018 Rewrite Plan
 
-Current cycle: 16 / 40
+Current cycle: 20 / 40
 
 Source of truth: `pdf/foc-just-the-rules-2018.pdf`
 
@@ -495,13 +495,17 @@ Acceptance criteria:
 - Cycle 14: Old `src/` frozen for rewrite. Reviewed the existing C header, implementation, CLIs, tests, Makefile, Swift module map, and build outputs. Current source is a 2024/playable-app prototype with JSON character persistence, event logs, snapshots, event buffers, board helpers, movement paces, targeting previews, scenario generation, AI actions, campaign advancement, grenades, healing, and Swift bridge support. The old source layout is marked remove-and-recreate inside `src/` during Cycle 15; no current file should be carried forward as-is. No 2018 code was added in this cycle.
 - Cycle 15: Final C source layout defined. Removed the old `src/` tree and recreated only `src/include/`, `src/lib/`, `src/cli/`, and `src/tests/`, each with a `.gitkeep` placeholder so the skeleton can be committed before implementation files are added. Verified the old Swift `module.modulemap` is gone and `src/.DS_Store` is absent. Updated `README.md` to stop documenting deleted prototype source files and commands. No 2018 rules implementation was added in this cycle.
 - Cycle 16: Public 2018 header created. Added `src/include/fieldofchaos2018.h` and removed the `src/include/.gitkeep` placeholder. The header uses `foc2018_` public names and defines 2018 stats, skills, weapons, range bands, movement paces, wounds, hit locations, characters, attack results, melee results, and healing results. It models the 2018 weapon list as Sniper Rifle, Rifle, Carbine, Automatic, and SubMG; wound pools as head, chest, abdomen, arms, and legs; movement in inches; and healing as no skill, bandage, First Aid, and Paramedic. Verified with `cc -std=c11 -Wall -Wextra -pedantic -fsyntax-only` and checked that stale 2024/app terms such as shotgun, grenade, yards, body-only wounds, JSON, events, buffers, scenarios, campaign, Swift, and Xcode are absent from the header.
+- Cycle 17: Dice and deterministic seeding implemented. Added `src/lib/fieldofchaos2018.c` with `foc2018_seed` and `foc2018_roll_d6`, backed by a small deterministic LCG rather than platform `rand()`. Added internal helper declarations in `src/lib/fieldofchaos2018_internal.h` for `foc2018_roll_d6_sum` and `foc2018_roll_d6_highest`. Added `src/tests/test_dice.c` so tests can verify repeated seeded d6 sequences plus sum/highest helper behavior before the final Makefile exists. Verified with `cc -std=c11 -Wall -Wextra -pedantic -Isrc/include -Isrc/lib src/lib/fieldofchaos2018.c src/tests/test_dice.c -o /tmp/foc2018_test_dice` followed by `/tmp/foc2018_test_dice`.
+- Cycle 18: Stats and character generation implemented. Added stat total, initial cap validation at 30, long-term cap validation at 40, and `foc2018_generate_stats`. Updated `foc2018_stat_generation_choice` with `stat_value_indices[5]` so the player's assignment of the five final values to RE, IR, AP, PH, and ME is represented explicitly. Generation now validates three d6 values, two distinct inverted dice, one +2 final-value index, and a five-value stat assignment permutation before applying the 2018 +2/+1 bonus procedure. Added `src/tests/test_stats.c` for caps, bounds, valid generation, reassignment behavior, and invalid choices. Verified dice and stat tests with direct `cc` builds because the final Makefile is planned for Cycle 34.
+- Cycle 19: Skill representation implemented from `pdf/foc-just-the-rules-2018.pdf`. Added stat and skill count sentinels, stat names, skill names, skill percentage validation, enum-based skill value lookup, skill-to-stat metadata, direct prerequisite arrays, and `foc2018_skill_improves_healing`. Represented Firearm Use Basic/Advanced, Close Combat, Improvised Weapon Use Basic, Clandestine Weapon Use Basic, First Aid, Paramedic, and the pharmaceutical chemistry chain. Pharmaceutical Chemistry is represented but does not improve 2018 healing. Added `src/tests/test_skills.c` for names, stats, prerequisites, percentage bounds, and healing relevance. Verified dice, stat, and skill tests with direct `cc` builds; `rg -n "advancement|experience|use-based|use based|XP" src/include src/lib` returned no matches.
+- Cycle 20: 2018 weapon metadata implemented from `pdf/foc-just-the-rules-2018.pdf`. Added a weapon count sentinel, `foc2018_weapon_name`, and `foc2018_parse_weapon` for Sniper Rifle, Rifle, Carbine, Automatic, and SubMG. Added `src/tests/test_weapons.c` to verify the five-weapon list, name parsing round-trips, invalid inputs, and rejection of Shotgun and Grenade as core 2018 weapons. Verified dice, stat, skill, and weapon tests with direct `cc` builds; `rg -n "foc2018_weapon_(shotgun|grenade)" src/include src/lib` returned no matches.
 
 ## Classification Inventory
 
 | Path | Classification | Notes |
 |---|---|---|
 | `pdf/` | Keep | Contains the 2018 source of truth and retained 2024/reference PDFs. |
-| `src/` | Header started | Final C-only layout now has `include/`, `lib/`, `cli/`, and `tests/`; public header was created in Cycle 16 and implementation continues in Cycle 17. |
+| `src/` | Weapon metadata implemented | Public header, deterministic dice/seeding, stat caps, stat generation, 2018 skill metadata, and 2018 weapon name parsing are implemented; weapon ranges begin in Cycle 21. |
 | `docs/` | Removed | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; removed entirely in Cycle 13. |
 | `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
@@ -583,6 +587,12 @@ Acceptance criteria:
 |---|---|
 | `src/include/fieldofchaos2018.h` | Public API header for the 2018 static library. |
 | `src/include/` | Public headers for the 2018 static library. |
+| `src/lib/fieldofchaos2018.c` | Initial 2018 rules library implementation with deterministic dice/seeding. |
+| `src/lib/fieldofchaos2018_internal.h` | Internal helpers for multi-die rolling. |
 | `src/lib/` | C implementation files for the 2018 rules library. |
 | `src/cli/` | C command-line program source. |
+| `src/tests/test_dice.c` | Focused dice/seeding tests until the full test suite and Makefile are created. |
+| `src/tests/test_stats.c` | Focused stats and character-generation tests until the full test suite and Makefile are created. |
+| `src/tests/test_skills.c` | Focused skill metadata and hierarchy tests until the full test suite and Makefile are created. |
+| `src/tests/test_weapons.c` | Focused 2018 weapon-list and name-parsing tests until the full test suite and Makefile are created. |
 | `src/tests/` | C test source for the 2018 rules library and CLI. |

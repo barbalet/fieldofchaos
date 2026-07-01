@@ -18,7 +18,8 @@ typedef enum foc2018_stat_id {
     foc2018_stat_irregular_intelligence,
     foc2018_stat_appearance,
     foc2018_stat_physical_health,
-    foc2018_stat_mental_health
+    foc2018_stat_mental_health,
+    foc2018_stat_count
 } foc2018_stat_id;
 
 typedef struct foc2018_stats {
@@ -46,7 +47,8 @@ typedef enum foc2018_skill_id {
     foc2018_skill_paramedic,
     foc2018_skill_evade,
     foc2018_skill_marching,
-    foc2018_skill_running
+    foc2018_skill_running,
+    foc2018_skill_count
 } foc2018_skill_id;
 
 typedef struct foc2018_skills {
@@ -74,7 +76,8 @@ typedef enum foc2018_weapon {
     foc2018_weapon_rifle,
     foc2018_weapon_carbine,
     foc2018_weapon_automatic,
-    foc2018_weapon_submg
+    foc2018_weapon_submg,
+    foc2018_weapon_count
 } foc2018_weapon;
 
 typedef enum foc2018_range_band {
@@ -151,6 +154,7 @@ typedef struct foc2018_stat_generation_choice {
     size_t first_inverted_die;
     size_t second_inverted_die;
     size_t plus_two_value;
+    size_t stat_value_indices[5];
 } foc2018_stat_generation_choice;
 
 typedef struct foc2018_attack_modifiers {
@@ -205,10 +209,13 @@ bool foc2018_generate_stats(const foc2018_stat_generation_choice *choice,
                             foc2018_stats *stats);
 
 const char *foc2018_stat_name(foc2018_stat_id stat);
+bool foc2018_validate_skills(const foc2018_skills *skills);
+int foc2018_skill_value(const foc2018_skills *skills, foc2018_skill_id skill);
 const char *foc2018_skill_name(foc2018_skill_id skill);
 foc2018_stat_id foc2018_skill_stat(foc2018_skill_id skill);
 const foc2018_skill_id *foc2018_skill_prerequisites(foc2018_skill_id skill,
                                                     size_t *count);
+bool foc2018_skill_improves_healing(foc2018_skill_id skill);
 
 const char *foc2018_weapon_name(foc2018_weapon weapon);
 bool foc2018_parse_weapon(const char *name, foc2018_weapon *weapon);
