@@ -1,6 +1,6 @@
 # Field Of Chaos Gold Rewrite Plan
 
-Current cycle: 40 / 40
+Current cycle: 40 / 52
 
 Source of truth: `pdf/foc-just-the-rules-gold.pdf`
 
@@ -40,6 +40,23 @@ Gold pivot note: Cycles 1-20 were completed against the pure 2018 just-the-rules
 Cycle 21 decision: active source files, public API symbols, library names, CLI names, tests, and Makefile outputs should migrate to Gold naming: `fieldofchaosgold` for file/library/CLI names and `focgold_` for public API symbols. The project should not retain `fieldofchaos2018` / `foc2018_` as active compatibility names unless a later cycle deliberately adds and tests a compatibility shim.
 
 `2018` remains valid only for retained reference PDFs, historical cycle notes, and explanatory text that identifies rules inherited from the 2018 core.
+
+## Post-40 PDF Parity Audit
+
+The original 40-cycle rewrite is complete, but `pdf/foc-just-the-rules-gold.pdf` is not yet fully represented by the C static library and CLI. `PLAN.md` must remain until the post-40 PDF parity cycles are complete.
+
+Known gaps found after extracting and reviewing `pdf/foc-just-the-rules-gold.pdf`:
+
+- Ranged base dice are reversed in the C implementation: the PDF says Close 1d6, Standard 2d6, Long 3d6; the current implementation exposes Close 3d6, Standard 2d6, Long 1d6.
+- Firearm Use, Advanced is not fully represented as a +2 ranged skill-dice contributor.
+- Weapon movement rules are incomplete: Sniper Rifle should be Very Slow, Rifle Slow, Carbine/Automatic Standard, SubMG Fast, and Sniper Rifle cannot fire under 12 inches.
+- Skill accounting is incomplete: one skill per statistic point in each area, with prerequisites counting against that accounting, is not represented.
+- Shotgun and Grenade area-of-effect resolution is table-only; it does not yet model nearest occupied shotgun cone band, all affected models including allies, or per-model blast/radius damage application.
+- Healing resolution reports recovery but does not yet apply one recovered wound to a target wound pool.
+- Melee +1/+2 skill-dice handling needs a PDF-parity pass.
+- Combat foe rules are partial: Animal head-shot success on 5-6 and Animal gas attack double-roll/half-move effects are missing.
+- Ranged action resolution is incomplete around weapon movement restrictions, ammunition mutation, reload/jam action state, called-head-shot turn state, and Soldier armor integration.
+- The CLI exposes useful examples, but it does not yet demonstrate every Gold PDF rule family.
 
 ## Development Cycles
 
@@ -535,6 +552,181 @@ Acceptance criteria:
 - No known required cleanup remains.
 - Final summary is ready for the user.
 
+### Cycle 41 - Build PDF Parity Traceability Matrix
+
+Create a rule-by-rule traceability matrix from `pdf/foc-just-the-rules-gold.pdf` to C API symbols, implementation functions, tests, and CLI examples.
+
+Acceptance criteria:
+
+- Every numbered Gold PDF section is represented in the matrix.
+- Every PDF table row is classified as implemented, partially implemented, missing, or deliberately out of scope.
+- Each partial or missing rule is assigned to one of Cycles 42-52.
+- The matrix is committed as an active repository artifact or embedded in this plan.
+- `PLAN.md` current cycle advances only after the matrix has no unassigned missing rule.
+
+### Cycle 42 - Correct Ranged Dice And Firearm Skill Dice
+
+Fix ranged attack dice to match the Gold PDF exactly.
+
+Acceptance criteria:
+
+- Close range base dice is 1d6.
+- Standard range base dice is 2d6.
+- Long range base dice is 3d6.
+- Firearm Use, Basic contributes +1 skill die.
+- Firearm Use, Advanced contributes +2 skill dice where applicable.
+- Tests cover base dice and skill dice independently.
+- CLI attack example reflects the corrected dice model.
+- `make test` passes.
+
+### Cycle 43 - Implement Weapon Movement Restrictions
+
+Implement the Gold weapon movement rules and Sniper Rifle under-range restriction.
+
+Acceptance criteria:
+
+- Sniper Rifle movement rule is Very Slow.
+- Rifle movement rule is Slow.
+- Carbine movement rule is Standard.
+- Automatic movement rule is Standard.
+- SubMG movement rule is Fast.
+- Shotgun movement rule is represented as normal firearm movement/referee-ruling data.
+- Sniper Rifle cannot fire under 12 inches.
+- Tests cover weapon movement rules and Sniper Rifle under-12-inch restriction.
+- `make test` passes.
+
+### Cycle 44 - Implement Skill Accounting Rules
+
+Represent the Gold skill accounting rule that a player is allowed one skill per statistic point in each area and prerequisites count against that accounting.
+
+Acceptance criteria:
+
+- API can count selected skills per governing stat.
+- API can count prerequisite skills against the same accounting.
+- API validates a character's skill selections against stat values.
+- Tests cover valid skill accounting, prerequisite accounting, and over-limit rejection.
+- No 2024 use-based advancement table is introduced.
+- `make test` passes.
+
+### Cycle 45 - Implement Shotgun Area Resolution
+
+Implement Gold shotgun cone resolution beyond static table metadata.
+
+Acceptance criteria:
+
+- API represents targets in shotgun cone bands.
+- Shotgun damage applies only to models in the nearest occupied cone band.
+- Farther occupied cone bands are ignored when a nearer band has any model.
+- Allies can be included as affected targets.
+- Each affected target receives the appropriate band damage roll.
+- Each shotgun wound uses the normal 3d6 hit-location procedure.
+- Tests cover nearest-band selection, ally inclusion, band damage, and hit-location allocation.
+- `make test` passes.
+
+### Cycle 46 - Implement Grenade Area Resolution
+
+Implement Gold grenade area resolution beyond static table metadata.
+
+Acceptance criteria:
+
+- API represents targets in grenade blast radius bands.
+- Open-radius bands are 1, 3, and 4 inches.
+- Building-radius bands are 3, 6, and 9 inches.
+- Allies can be included as affected targets.
+- Dud grenades cause no blast damage.
+- Each affected target receives the appropriate radius-band damage roll.
+- Each grenade wound uses the normal 3d6 hit-location procedure.
+- Tests cover open blast, building blast, ally inclusion, dud behavior, and hit-location allocation.
+- `make test` passes.
+
+### Cycle 47 - Implement Damage Application To Wound Pools
+
+Apply bullet, shotgun, grenade, melee, and healing results to character wound pools.
+
+Acceptance criteria:
+
+- API can apply wounds to a specific hit location without dropping a pool below zero.
+- API can apply multi-wound shotgun and grenade damage one wound at a time with hit locations.
+- Wound effects update after damage application.
+- Healing can restore exactly one wound without exceeding maximum wounds.
+- Tests cover damage, overkill clamping, wound effects after damage, and healing clamping.
+- `make test` passes.
+
+### Cycle 48 - Complete Melee Skill Dice Parity
+
+Make melee dice handling match the Gold PDF's `1d6 / +1 skill die / +2 skill dice` rule.
+
+Acceptance criteria:
+
+- Blow attacks use threshold 3-6 and base 1d6.
+- Weapon attacks use threshold 4-6 and base 1d6.
+- API exposes whether a melee situation has +0, +1, or +2 skill dice.
+- Tests cover +0, +1, and +2 skill-dice melee cases.
+- No 2024 2-6 or 3-6 melee threshold is introduced.
+- `make test` passes.
+
+### Cycle 49 - Complete Healing Application
+
+Complete healing as a target-state operation, not only a roll result.
+
+Acceptance criteria:
+
+- No medical skill rolls 1d6 and recovers one wound on 6.
+- Bandage/equipment recovers one wound on 5-6.
+- First Aid rolls 2d6 and uses the highest die.
+- Paramedic rolls 3d6 and uses the highest die.
+- Successful healing applies one recovered wound to a selected or rolled wound location.
+- Healing cannot exceed maximum wound values.
+- Pharmaceutical Chemistry does not improve healing.
+- Tests cover all methods and target wound mutation.
+- `make test` passes.
+
+### Cycle 50 - Complete Combat Foe Rules
+
+Finish combat foe rules from the Gold PDF.
+
+Acceptance criteria:
+
+- Animal head-shot gas release is represented.
+- Animal head shot only succeeds on 5-6 on d6.
+- Animal gas attack double-roll requirement is represented.
+- Animal gas attack half-move effect is represented.
+- Animal gas cloud d6+6 radius, 2-inch shrink, 2-inch d6-direction drift, and +1 attack die are represented.
+- Hunter +1 movement is represented in movement calculations where foe type is supplied.
+- Soldier armor save on 5-6 integrates with shot wound resolution.
+- Shotgun wounds count as shot wounds.
+- Grenade wounds do not count as shot wounds unless a referee-ruling flag is supplied.
+- Tests cover all foe rules.
+- `make test` passes.
+
+### Cycle 51 - Expand CLI And README For Full PDF Parity
+
+Update the CLI and README so the executable demonstrates every Gold PDF rule family represented by the library.
+
+Acceptance criteria:
+
+- CLI can print stats and character-generation rules.
+- CLI can print skill hierarchy and skill-accounting examples.
+- CLI can print weapon, Shotgun, Grenade, movement, wound, hit-location, melee, healing, and foe rule tables.
+- CLI can run deterministic examples for ranged attack, Shotgun, Grenade, melee, healing, and Soldier armor.
+- README documents the complete CLI command set.
+- `make test` passes and CLI smoke examples pass.
+
+### Cycle 52 - Final PDF Parity Signoff
+
+Verify that the Gold PDF is truly represented by the C static library and CLI.
+
+Acceptance criteria:
+
+- The Cycle 41 traceability matrix marks every Gold PDF rule implemented or explicitly out of scope.
+- No known PDF parity gap remains.
+- `make clean` succeeds.
+- `make` succeeds.
+- `make test` succeeds.
+- CLI smoke examples for all documented commands succeed.
+- Active-file scans find no stale 2018 active API names, yard-based ranges, body-only wound model, 2024 ranged thresholds, 2024 SubMG rewrite, 2024 Pharmaceutical Chemistry healing, 2024 grave PH roll, or retired app workflow.
+- If the user agrees that Cycle 52 is complete, `PLAN.md` can be deleted.
+
 ## Cycle Notes
 
 - Cycle 0: Plan initialized. No cleanup or rewrite cycles have been run yet.
@@ -579,6 +771,7 @@ Acceptance criteria:
 - Cycle 38: README rewritten for the final Gold C static library and CLI. It names `pdf/foc-just-the-rules-gold.pdf` as source of truth, explains retained 2018 and 2024 PDFs as reference-only, documents the library layout, documents `make`, `make test`, and `make clean`, and includes CLI examples.
 - Cycle 39: Final consistency pass completed. `git status --short` was reviewed during the cycle, active-file `rg` scans found no stale app workflow references, and this plan was updated to reflect the final completed state.
 - Cycle 40: Completion signoff completed. Current cycle is 40 / 40, `make test` passes from `src/`, `README.md` is final for the Gold C-only project shape, retained PDFs are present including `pdf/foc-just-the-rules-gold.pdf`, and no known required cleanup remains.
+- Post-40 PDF parity audit: Extracted and reviewed `pdf/foc-just-the-rules-gold.pdf` against the C static library and CLI. The 40-cycle C-only rewrite is complete, but true Gold PDF parity is not complete. Known gaps include reversed ranged base dice, incomplete Firearm Advanced dice handling, incomplete weapon movement restrictions, missing Sniper Rifle under-12-inch restriction, missing skill accounting, table-only Shotgun/Grenade area effects, incomplete damage/healing state mutation, incomplete melee +1/+2 skill-dice parity, partial Animal/gas foe rules, and incomplete CLI coverage. Added Cycles 41-52 to finish true PDF parity.
 
 ## Classification Inventory
 
