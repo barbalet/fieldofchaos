@@ -1,6 +1,6 @@
 # Field Of Chaos 2018 Rewrite Plan
 
-Current cycle: 12 / 40
+Current cycle: 15 / 40
 
 Source of truth: `pdf/foc-just-the-rules-2018.pdf`
 
@@ -491,14 +491,17 @@ Acceptance criteria:
 - Cycle 10: Scripts reviewed and classified. Reviewed `scripts/run_ui_exploration.sh`, `scripts/generate_app_icon.swift`, `scripts/package_release.sh`, and `scripts/smoke_playable.sh`; all four are Swift/Xcode/app-bundle workflow scripts and are marked for removal in Cycle 11. No current script is useful for the 2018 C-only library/CLI project. Future C-only helper needs should be recreated later if useful: a focused PDF extraction/traceability helper, a C build/test helper, or a rule-table generation helper.
 - Cycle 11: Scripts directory cleaned. Removed `scripts/` entirely because Cycle 10 found no C/PDF-relevant scripts to keep. Verified `scripts/` no longer exists and `README.md` has no active script, Swift, Xcode, package, UI exploration, or app packaging command references. Updated `README.md` wording so only historical docs, not scripts, are described as awaiting review.
 - Cycle 12: Documentation reviewed and classified. Reviewed every file currently under `docs/`: architecture, sample JSON, cycle logs, rules backlog, UI/Metal/campaign/release/playable docs, and the extracted/natural-language rules documents. All docs are either derived from the 2024 rules extraction/prototype or tied to the retired Swift/Xcode/Metal/playable-app direction. No minimal 2018 traceability doc was found; the active 2018 source of truth remains `pdf/foc-just-the-rules-2018.pdf`. `docs/` is marked for removal in Cycle 13, with any future 2018 traceability document to be recreated deliberately from the 2018 PDF.
+- Cycle 13: Documentation directory cleaned. Removed `docs/` entirely because Cycle 12 found no minimal 2018-relevant traceability docs to keep. Updated `README.md` so it no longer references deleted docs or sample JSON files under `docs/`; examples now use `/tmp/foc-alice.json` and `/tmp/foc-bob.json`. Verified `docs/` no longer exists, active entry points no longer reference deleted docs, and no retained documentation contradicts `pdf/foc-just-the-rules-2018.pdf` as source of truth.
+- Cycle 14: Old `src/` frozen for rewrite. Reviewed the existing C header, implementation, CLIs, tests, Makefile, Swift module map, and build outputs. Current source is a 2024/playable-app prototype with JSON character persistence, event logs, snapshots, event buffers, board helpers, movement paces, targeting previews, scenario generation, AI actions, campaign advancement, grenades, healing, and Swift bridge support. The old source layout is marked remove-and-recreate inside `src/` during Cycle 15; no current file should be carried forward as-is. No 2018 code was added in this cycle.
+- Cycle 15: Final C source layout defined. Removed the old `src/` tree and recreated only `src/include/`, `src/lib/`, `src/cli/`, and `src/tests/`, each with a `.gitkeep` placeholder so the skeleton can be committed before implementation files are added. Verified the old Swift `module.modulemap` is gone and `src/.DS_Store` is absent. Updated `README.md` to stop documenting deleted prototype source files and commands. No 2018 rules implementation was added in this cycle.
 
 ## Classification Inventory
 
 | Path | Classification | Notes |
 |---|---|---|
 | `pdf/` | Keep | Contains the 2018 source of truth and retained 2024/reference PDFs. |
-| `src/` | Rewrite | Current C code targets 2024 mechanics and includes generated build outputs. |
-| `docs/` | Remove in Cycle 13 | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; no minimal 2018 traceability doc exists. |
+| `src/` | Skeleton created | Final C-only layout now has `include/`, `lib/`, `cli/`, and `tests/`; implementation begins in Cycle 16. |
+| `docs/` | Removed | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; removed entirely in Cycle 13. |
 | `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
 | `FieldOfChaos.xcodeproj/` | Remove | Xcode project, outside Makefile C-only scope. |
@@ -525,25 +528,59 @@ Acceptance criteria:
 
 | Path | Classification | Notes |
 |---|---|---|
-| `docs/architecture.md` | Remove | Retired SwiftUI/Metal/app architecture and 2024 prototype structure. |
-| `docs/alice.json` | Remove | Sample character JSON for the old prototype/app workflow, not a 2018 source document. |
-| `docs/bob.json` | Remove | Sample character JSON for the old prototype/app workflow, not a 2018 source document. |
-| `docs/campaign-system.md` | Remove | Campaign app design from cycles 71-80. |
-| `docs/cycles-01-10-execution.md` | Remove | Historical playable-app cycle log with Swift package workflow. |
-| `docs/cycles-11-20-execution.md` | Remove | Historical playable-app cycle log with SwiftUI app work. |
-| `docs/cycles-21-30-execution.md` | Remove | Historical playable-app cycle log with Metal/UI work. |
-| `docs/cycles-31-40-execution.md` | Remove | Historical playable-app cycle log with scenario/AI/campaign work. |
-| `docs/cycles-41-50-execution.md` | Remove | Historical playable-app cycle log with tutorial/rules overlay/campaign work. |
-| `docs/cycles-51-60-execution.md` | Remove | Historical playable-app cycle log with release candidate packaging work. |
-| `docs/cycles-61-80-execution.md` | Remove | Historical playable-app cycle log with campaign/autosave/Swift/Xcode verification. |
-| `docs/cycles-81-100-execution.md` | Remove | Historical playable-app cycle log with Xcode/package/icon/smoke verification. |
-| `docs/field-of-chaos-rules-extracted.md` | Remove | Extracted from `pdf/field-of-chaos-rpg-070524.pdf`, not the 2018 source of truth. |
-| `docs/field-of-chaos-rules-natural-english.md` | Remove | Natural-language rewrite of the 2024 extraction. |
-| `docs/field-of-chaos-rules-source.txt` | Remove | Extracted text from 2024 pages, not the 2018 source of truth. |
-| `docs/metal-qa.md` | Remove | Metal board QA for the retired app workflow. |
-| `docs/playable-game-60-cycle-plan.md` | Remove | Retired SwiftUI/Metal playable game plan. |
-| `docs/playable-loop-scope.md` | Remove | Retired playable app scope. |
-| `docs/playable-mac-acceptance-checklist.md` | Remove | Retired playable Mac acceptance checklist. |
-| `docs/release-candidate-qa.md` | Remove | Retired release candidate app QA checklist. |
-| `docs/rules-gap-backlog.md` | Remove | Backlog compares old C prototype to 2024 extracted rules. |
-| `docs/ui-test-suite.md` | Remove | Retired UI test suite documentation. |
+| `docs/architecture.md` | Removed | Retired SwiftUI/Metal/app architecture and 2024 prototype structure. |
+| `docs/alice.json` | Removed | Sample character JSON for the old prototype/app workflow, not a 2018 source document. |
+| `docs/bob.json` | Removed | Sample character JSON for the old prototype/app workflow, not a 2018 source document. |
+| `docs/campaign-system.md` | Removed | Campaign app design from cycles 71-80. |
+| `docs/cycles-01-10-execution.md` | Removed | Historical playable-app cycle log with Swift package workflow. |
+| `docs/cycles-11-20-execution.md` | Removed | Historical playable-app cycle log with SwiftUI app work. |
+| `docs/cycles-21-30-execution.md` | Removed | Historical playable-app cycle log with Metal/UI work. |
+| `docs/cycles-31-40-execution.md` | Removed | Historical playable-app cycle log with scenario/AI/campaign work. |
+| `docs/cycles-41-50-execution.md` | Removed | Historical playable-app cycle log with tutorial/rules overlay/campaign work. |
+| `docs/cycles-51-60-execution.md` | Removed | Historical playable-app cycle log with release candidate packaging work. |
+| `docs/cycles-61-80-execution.md` | Removed | Historical playable-app cycle log with campaign/autosave/Swift/Xcode verification. |
+| `docs/cycles-81-100-execution.md` | Removed | Historical playable-app cycle log with Xcode/package/icon/smoke verification. |
+| `docs/field-of-chaos-rules-extracted.md` | Removed | Extracted from `pdf/field-of-chaos-rpg-070524.pdf`, not the 2018 source of truth. |
+| `docs/field-of-chaos-rules-natural-english.md` | Removed | Natural-language rewrite of the 2024 extraction. |
+| `docs/field-of-chaos-rules-source.txt` | Removed | Extracted text from 2024 pages, not the 2018 source of truth. |
+| `docs/metal-qa.md` | Removed | Metal board QA for the retired app workflow. |
+| `docs/playable-game-60-cycle-plan.md` | Removed | Retired SwiftUI/Metal playable game plan. |
+| `docs/playable-loop-scope.md` | Removed | Retired playable app scope. |
+| `docs/playable-mac-acceptance-checklist.md` | Removed | Retired playable Mac acceptance checklist. |
+| `docs/release-candidate-qa.md` | Removed | Retired release candidate app QA checklist. |
+| `docs/rules-gap-backlog.md` | Removed | Backlog compares old C prototype to 2024 extracted rules. |
+| `docs/ui-test-suite.md` | Removed | Retired UI test suite documentation. |
+
+## Source Freeze Inventory
+
+| Path | Classification | Notes |
+|---|---|---|
+| `src/Makefile` | Replace later | Builds old direct executables and object file; final Makefile is planned for Cycle 34. |
+| `src/fieldofchaos.c` | Replace | Old JSON create/duel CLI tied to the prototype API and `/tmp` examples. |
+| `src/character_create.c` | Replace | Duplicate old character JSON creator CLI. |
+| `src/engine/include/fieldofchaos_engine.h` | Replace | Old public API uses `foc_` names and exposes 2024/playable-app concepts: snapshots, event buffers, board helpers, scenario, AI, campaign, JSON, and Swift-facing types. |
+| `src/engine/fieldofchaos_engine.c` | Replace | Monolithic old implementation mixes character generation, combat, JSON parsing, event logs, board actions, healing, grenades, scenario generation, AI, and campaign advancement. |
+| `src/engine/include/module.modulemap` | Remove | Swift module map from the retired app bridge. |
+| `src/tests/test_engine.c` | Replace | Tests lock old prototype features including JSON schema, event buffers, board helpers, scenario, AI, campaign, healing, and grenades. |
+| `src/fieldofchaos` | Remove | Compiled executable build artifact. |
+| `src/character_create` | Remove | Compiled executable build artifact. |
+| `src/tests/test_engine` | Remove | Compiled test executable build artifact. |
+| `src/engine/fieldofchaos_engine.o` | Remove | Compiled object build artifact. |
+| `src/.DS_Store` | Remove | Local filesystem metadata. |
+
+## Old Source Mechanics To Replace
+
+- Character generation and validation currently use the old `foc_generate_stats` flow and a stat total cap of 40; regenerate from `pdf/foc-just-the-rules-2018.pdf`.
+- Wounds currently use head/body/arms/legs pools of `1/4/1/1/2/2`, body-zero unconsciousness, total-zero death, chest-wind checks, and grave-condition checks; verify all of this against the 2018 rules before reimplementing.
+- Weapons currently include none, sniper, rifle, SubMG, and shotgun with hard-coded yard ranges, clip counts, shotgun damage, SubMG jam behavior, armor saves, cover, evade, and running penalties; rebuild from the 2018 weapon and skill hierarchy.
+- Healing currently uses item-like medical levels (`first_aid`, `paramedic`, `pharma`) and simple d6 thresholds; replace with the 2018 medical skills and hierarchy.
+- Playable-app systems currently include movement paces, targeting previews, board reload/attack/clear-jam/heal/grenade helpers, scenario generation, AI actions, campaign records, snapshots, event buffers, and JSON-lines event logs; omit unless they are explicitly part of the 2018 core rules library/CLI scope.
+
+## Current Source Layout
+
+| Path | Purpose |
+|---|---|
+| `src/include/` | Public headers for the 2018 static library. |
+| `src/lib/` | C implementation files for the 2018 rules library. |
+| `src/cli/` | C command-line program source. |
+| `src/tests/` | C test source for the 2018 rules library and CLI. |
