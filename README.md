@@ -4,7 +4,7 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 
 ## Rewrite Status
 
-This repository is being rewritten around `pdf/foc-just-the-rules-2018.pdf` as the source of truth. The Swift, Xcode, and macOS app workflow has been retired. Some historical docs and scripts still mention that workflow, but they are retained only until their planned review/cleanup cycles.
+This repository is being rewritten around `pdf/foc-just-the-rules-2018.pdf` as the source of truth. The Swift, Xcode, and macOS app workflow has been retired. Some historical docs still mention that workflow, but they are retained only until their planned review/cleanup cycles.
 
 ## Rules Sources
 

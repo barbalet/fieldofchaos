@@ -1,6 +1,6 @@
 # Field Of Chaos 2018 Rewrite Plan
 
-Current cycle: 9 / 40
+Current cycle: 12 / 40
 
 Source of truth: `pdf/foc-just-the-rules-2018.pdf`
 
@@ -488,6 +488,9 @@ Acceptance criteria:
 - Cycle 7: Swift package manifest removed. Removed `Package.swift` and verified `test ! -e Package.swift` passes. Verified `src/Makefile` remains present. Updated `README.md` to name `pdf/foc-just-the-rules-2018.pdf` as the active source of truth and to mark Swift/Xcode/app workflows as retired; `rg -n "swift (build|run|test)|xcodebuild" README.md` returns no active README commands. Historical docs/scripts still mention Swift/Xcode and remain deferred to their planned review cycles.
 - Cycle 8: UI tests removed. Removed only `UITests/`, which contained `FieldOfChaosExploratoryUITests.swift`. Verified `UITests/` no longer exists and `src/tests/test_engine.c` plus the current `src/tests/test_engine` build artifact remain present. Verified `README.md` no longer documents an active UI test command; the remaining historical UI exploration script remains deferred to the scripts review/cleanup cycles.
 - Cycle 9: App packaging assets removed. Removed only `packaging/`, which contained `AppIcon.icns` and `Info.plist` for the retired app bundle. Verified `packaging/` no longer exists. Verified active entry points (`README.md` and `.github/`) do not document or run a release app bundle workflow; remaining script/doc references are historical and deferred to the upcoming script and docs review cycles. No C release packaging decision was introduced.
+- Cycle 10: Scripts reviewed and classified. Reviewed `scripts/run_ui_exploration.sh`, `scripts/generate_app_icon.swift`, `scripts/package_release.sh`, and `scripts/smoke_playable.sh`; all four are Swift/Xcode/app-bundle workflow scripts and are marked for removal in Cycle 11. No current script is useful for the 2018 C-only library/CLI project. Future C-only helper needs should be recreated later if useful: a focused PDF extraction/traceability helper, a C build/test helper, or a rule-table generation helper.
+- Cycle 11: Scripts directory cleaned. Removed `scripts/` entirely because Cycle 10 found no C/PDF-relevant scripts to keep. Verified `scripts/` no longer exists and `README.md` has no active script, Swift, Xcode, package, UI exploration, or app packaging command references. Updated `README.md` wording so only historical docs, not scripts, are described as awaiting review.
+- Cycle 12: Documentation reviewed and classified. Reviewed every file currently under `docs/`: architecture, sample JSON, cycle logs, rules backlog, UI/Metal/campaign/release/playable docs, and the extracted/natural-language rules documents. All docs are either derived from the 2024 rules extraction/prototype or tied to the retired Swift/Xcode/Metal/playable-app direction. No minimal 2018 traceability doc was found; the active 2018 source of truth remains `pdf/foc-just-the-rules-2018.pdf`. `docs/` is marked for removal in Cycle 13, with any future 2018 traceability document to be recreated deliberately from the 2018 PDF.
 
 ## Classification Inventory
 
@@ -495,8 +498,8 @@ Acceptance criteria:
 |---|---|---|
 | `pdf/` | Keep | Contains the 2018 source of truth and retained 2024/reference PDFs. |
 | `src/` | Rewrite | Current C code targets 2024 mechanics and includes generated build outputs. |
-| `docs/` | Defer | Review in cycles 12-13; likely remove or reduce to minimal 2018 traceability. |
-| `scripts/` | Defer | Review in cycles 10-11; likely remove Swift/Xcode/app scripts, possibly recreate C-only helpers. |
+| `docs/` | Remove in Cycle 13 | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; no minimal 2018 traceability doc exists. |
+| `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
 | `FieldOfChaos.xcodeproj/` | Remove | Xcode project, outside Makefile C-only scope. |
 | `UITests/` | Remove | App-level UI tests, outside C-only scope. |
@@ -508,3 +511,39 @@ Acceptance criteria:
 | `.gitignore` | Keep | Should be updated later if new C build artifacts require ignore rules. |
 | `tmp/` | Remove | Generated intermediate PDF/text/render artifacts. |
 | `.DS_Store` files | Remove | Local filesystem metadata, not source. |
+
+## Script Review Inventory
+
+| Path | Classification | Notes |
+|---|---|---|
+| `scripts/run_ui_exploration.sh` | Removed | Ran the deleted UI test suite against a packaged macOS app. |
+| `scripts/generate_app_icon.swift` | Removed | Swift/AppKit icon generator for deleted app packaging assets. |
+| `scripts/package_release.sh` | Removed | Built Swift release app bundle and copied deleted packaging/AppShell assets. |
+| `scripts/smoke_playable.sh` | Removed | Ran C tests, then Swift build, Xcode build, app packaging, and packaged resource checks. |
+
+## Documentation Review Inventory
+
+| Path | Classification | Notes |
+|---|---|---|
+| `docs/architecture.md` | Remove | Retired SwiftUI/Metal/app architecture and 2024 prototype structure. |
+| `docs/alice.json` | Remove | Sample character JSON for the old prototype/app workflow, not a 2018 source document. |
+| `docs/bob.json` | Remove | Sample character JSON for the old prototype/app workflow, not a 2018 source document. |
+| `docs/campaign-system.md` | Remove | Campaign app design from cycles 71-80. |
+| `docs/cycles-01-10-execution.md` | Remove | Historical playable-app cycle log with Swift package workflow. |
+| `docs/cycles-11-20-execution.md` | Remove | Historical playable-app cycle log with SwiftUI app work. |
+| `docs/cycles-21-30-execution.md` | Remove | Historical playable-app cycle log with Metal/UI work. |
+| `docs/cycles-31-40-execution.md` | Remove | Historical playable-app cycle log with scenario/AI/campaign work. |
+| `docs/cycles-41-50-execution.md` | Remove | Historical playable-app cycle log with tutorial/rules overlay/campaign work. |
+| `docs/cycles-51-60-execution.md` | Remove | Historical playable-app cycle log with release candidate packaging work. |
+| `docs/cycles-61-80-execution.md` | Remove | Historical playable-app cycle log with campaign/autosave/Swift/Xcode verification. |
+| `docs/cycles-81-100-execution.md` | Remove | Historical playable-app cycle log with Xcode/package/icon/smoke verification. |
+| `docs/field-of-chaos-rules-extracted.md` | Remove | Extracted from `pdf/field-of-chaos-rpg-070524.pdf`, not the 2018 source of truth. |
+| `docs/field-of-chaos-rules-natural-english.md` | Remove | Natural-language rewrite of the 2024 extraction. |
+| `docs/field-of-chaos-rules-source.txt` | Remove | Extracted text from 2024 pages, not the 2018 source of truth. |
+| `docs/metal-qa.md` | Remove | Metal board QA for the retired app workflow. |
+| `docs/playable-game-60-cycle-plan.md` | Remove | Retired SwiftUI/Metal playable game plan. |
+| `docs/playable-loop-scope.md` | Remove | Retired playable app scope. |
+| `docs/playable-mac-acceptance-checklist.md` | Remove | Retired playable Mac acceptance checklist. |
+| `docs/release-candidate-qa.md` | Remove | Retired release candidate app QA checklist. |
+| `docs/rules-gap-backlog.md` | Remove | Backlog compares old C prototype to 2024 extracted rules. |
+| `docs/ui-test-suite.md` | Remove | Retired UI test suite documentation. |
