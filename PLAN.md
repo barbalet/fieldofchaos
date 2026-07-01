@@ -1,6 +1,6 @@
 # Field Of Chaos 2018 Rewrite Plan
 
-Current cycle: 5 / 40
+Current cycle: 8 / 40
 
 Source of truth: `pdf/foc-just-the-rules-2018.pdf`
 
@@ -484,6 +484,9 @@ Acceptance criteria:
 - Cycle 3: PDF sources preserved. Confirmed these files exist: `pdf/foc-just-the-rules-2018.pdf`, `pdf/foc-just-the-rules-2024.pdf`, `pdf/field-of-chaos-rpg-070524.pdf`, and `pdf/foc_rpg_051018.pdf`. `find pdf -maxdepth 1 -type f -print | sort` showed only those four PDF files. `git status --short pdf` was clean. No PDFs were deleted or renamed.
 - Cycle 4: Temporary generated artifacts removed. Removed only `tmp/`, which contained generated/intermediate PDF extraction and render files. Verified `tmp/` no longer exists, `git status --short` shows only `?? PLAN.md`, and retained PDFs remain present. No files outside `tmp/` were removed.
 - Cycle 5: Swift app source removed. Removed only `AppShell/`, including the SwiftUI app files and Metal shader under `AppShell/Shaders/`. Verified `AppShell/` no longer exists, `src/` C files remain present, and all retained PDFs remain present. `git status --short` shows deletions only under `AppShell/` plus the untracked `PLAN.md`.
+- Cycle 6: Xcode project removed. Removed only `FieldOfChaos.xcodeproj/`, including project, workspace user state, and scheme management files. Verified `find . -name "*.xcodeproj" -print` returns no Xcode project bundles. Verified `PLAN.md` still identifies `make` as the target build system and no replacement Xcode project was added.
+- Cycle 7: Swift package manifest removed. Removed `Package.swift` and verified `test ! -e Package.swift` passes. Verified `src/Makefile` remains present. Updated `README.md` to name `pdf/foc-just-the-rules-2018.pdf` as the active source of truth and to mark Swift/Xcode/app workflows as retired; `rg -n "swift (build|run|test)|xcodebuild" README.md` returns no active README commands. Historical docs/scripts still mention Swift/Xcode and remain deferred to their planned review cycles.
+- Cycle 8: UI tests removed. Removed only `UITests/`, which contained `FieldOfChaosExploratoryUITests.swift`. Verified `UITests/` no longer exists and `src/tests/test_engine.c` plus the current `src/tests/test_engine` build artifact remain present. Verified `README.md` no longer documents an active UI test command; the remaining historical UI exploration script remains deferred to the scripts review/cleanup cycles.
 
 ## Classification Inventory
 

@@ -2,9 +2,16 @@
 
 Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a focus on producing and reviewing a C-language implementation of the rules.
 
+## Rewrite Status
+
+This repository is being rewritten around `pdf/foc-just-the-rules-2018.pdf` as the source of truth. The Swift, Xcode, and macOS app workflow has been retired. Some historical docs and scripts still mention that workflow, but they are retained only until their planned review/cleanup cycles.
+
 ## Rules Sources
 
-- Canonical source PDF: `pdf/field-of-chaos-rpg-070524.pdf`
+- Canonical source PDF: `pdf/foc-just-the-rules-2018.pdf`
+- Reference-only newer PDF: `pdf/foc-just-the-rules-2024.pdf`
+- Reference-only full newer PDF: `pdf/field-of-chaos-rpg-070524.pdf`
+- Reference-only full 2018 PDF: `pdf/foc_rpg_051018.pdf`
 - Extracted rules text source: `docs/field-of-chaos-rules-source.txt`
 - Structured extracted rules: `docs/field-of-chaos-rules-extracted.md`
 - Natural-English rules rewrite: `docs/field-of-chaos-rules-natural-english.md`
@@ -13,7 +20,7 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 
 - Build a C-language program version of the game rules for validation, review, and debugging.
 - Keep source material traceable back to the original PDF while maintaining implementation-friendly Markdown documentation.
-- Plan the path from the current C rules prototype to a packaged SwiftUI/Metal/C playable game: `docs/playable-game-60-cycle-plan.md`.
+- Replace the prior playable SwiftUI/Metal/C app direction with a 2018-focused C static library and C program.
 - Track the first ten execution cycles in `docs/cycles-01-10-execution.md`.
 - Track cycles 11-20 in `docs/cycles-11-20-execution.md`.
 - Track cycles 21-30 in `docs/cycles-21-30-execution.md`.
@@ -28,44 +35,11 @@ Programmatic exploration of the Field of Chaos tabletop skirmish RPG, with a foc
 - Reusable C engine API: `src/engine/include/fieldofchaos_engine.h`
 - C engine implementation: `src/engine/fieldofchaos_engine.c`
 - CLI wrappers: `src/fieldofchaos.c` and `src/character_create.c`
-- SwiftUI app shell: `AppShell/FieldOfChaosAppShell.swift`
-- Swift app state and views: `AppShell/GameStore.swift`, `AppShell/AppViews.swift`, and `AppShell/CInterop.swift`
-- Skirmish board model and Metal renderer: `AppShell/SkirmishModel.swift`, `AppShell/SkirmishViews.swift`, and `AppShell/BoardRenderer.swift`
-- Rule reference UI: `AppShell/RuleReference.swift` and `AppShell/RuleViews.swift`
-- Campaign model and UI: `AppShell/CampaignModel.swift` and `AppShell/CampaignViews.swift`
-- Tutorial flow: `AppShell/TutorialModel.swift`
-- Swift Package manifest: `Package.swift`
-- Mac Xcode project: `FieldOfChaos.xcodeproj`
-- Playable Mac completion checklist: `docs/playable-mac-acceptance-checklist.md`
-- Campaign system notes: `docs/campaign-system.md`
-- Cycle-100 release QA: `docs/release-candidate-qa.md`
-- Exploratory UI test suite: `docs/ui-test-suite.md`
+- Historical app/playable docs remain under `docs/` until their review cycle.
 
-## Xcode
+## Retired App Workflow
 
-Open the Mac project directly:
-
-```bash
-open FieldOfChaos.xcodeproj
-```
-
-The project has these schemes/targets:
-
-- `FieldOfChaos`: SwiftUI + Metal macOS app, with the C engine compiled into the app target.
-- `fieldofchaos`: C command-line utility for create/duel workflows.
-- `character_create`: C character JSON utility.
-- `test_engine`: C engine test executable.
-
-The app target bundles `docs/alice.json`, `docs/bob.json`, and the natural-English rule reference so it can run from Xcode without relying on the repository working directory.
-
-CLI verification from Terminal:
-
-```bash
-xcodebuild -project FieldOfChaos.xcodeproj -scheme FieldOfChaos -configuration Debug build
-xcodebuild -project FieldOfChaos.xcodeproj -scheme fieldofchaos -configuration Debug build
-xcodebuild -project FieldOfChaos.xcodeproj -scheme character_create -configuration Debug build
-xcodebuild -project FieldOfChaos.xcodeproj -scheme test_engine -configuration Debug build
-```
+The prior Swift package, Xcode project, app packaging, and UI-test workflows are no longer active project workflows. The README will be rewritten near the end of the 40-cycle plan for the final C-only project shape.
 
 ## C Utilities
 
@@ -146,34 +120,4 @@ Run deterministic C engine tests:
 ```bash
 cd src
 make test
-```
-
-Build the SwiftUI shell and C engine package:
-
-```bash
-swift build
-```
-
-Run the SwiftUI shell from the repository root:
-
-```bash
-swift run FieldOfChaosAppShell
-```
-
-Create a local release candidate app bundle:
-
-```bash
-sh scripts/package_release.sh
-```
-
-Run the playable Mac smoke check:
-
-```bash
-sh scripts/smoke_playable.sh
-```
-
-Run the exploratory UI suite:
-
-```bash
-sh scripts/run_ui_exploration.sh
 ```
