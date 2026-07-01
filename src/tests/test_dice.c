@@ -1,5 +1,5 @@
-#include "fieldofchaos2018.h"
-#include "../lib/fieldofchaos2018_internal.h"
+#include "fieldofchaosgold.h"
+#include "../lib/fieldofchaosgold_internal.h"
 
 #include <stdio.h>
 
@@ -17,15 +17,15 @@ static void test_seed_repeats_sequence(void) {
     int second[8];
     int index;
 
-    foc2018_seed(2018u);
+    focgold_seed(2018u);
     for (index = 0; index < 8; index++) {
-        first[index] = foc2018_roll_d6();
+        first[index] = focgold_roll_d6();
         expect_true(first[index] >= 1 && first[index] <= 6, "roll should stay within d6 bounds");
     }
 
-    foc2018_seed(2018u);
+    focgold_seed(2018u);
     for (index = 0; index < 8; index++) {
-        second[index] = foc2018_roll_d6();
+        second[index] = focgold_roll_d6();
         expect_true(second[index] == first[index], "same seed should repeat d6 sequence");
     }
 }
@@ -38,23 +38,23 @@ static void test_multiple_dice_helpers(void) {
     int highest;
     int expected_highest;
 
-    expect_true(foc2018_roll_d6_sum(0) == 0, "zero dice sum should be zero");
-    expect_true(foc2018_roll_d6_highest(0) == 0, "zero dice highest should be zero");
+    expect_true(focgold_roll_d6_sum(0) == 0, "zero dice sum should be zero");
+    expect_true(focgold_roll_d6_highest(0) == 0, "zero dice highest should be zero");
 
-    foc2018_seed(42u);
-    total = foc2018_roll_d6_sum(3);
-    foc2018_seed(42u);
-    a = foc2018_roll_d6();
-    b = foc2018_roll_d6();
-    c = foc2018_roll_d6();
+    focgold_seed(42u);
+    total = focgold_roll_d6_sum(3);
+    focgold_seed(42u);
+    a = focgold_roll_d6();
+    b = focgold_roll_d6();
+    c = focgold_roll_d6();
     expect_true(total == a + b + c, "sum helper should match individual rolls");
 
-    foc2018_seed(99u);
-    highest = foc2018_roll_d6_highest(3);
-    foc2018_seed(99u);
-    a = foc2018_roll_d6();
-    b = foc2018_roll_d6();
-    c = foc2018_roll_d6();
+    focgold_seed(99u);
+    highest = focgold_roll_d6_highest(3);
+    focgold_seed(99u);
+    a = focgold_roll_d6();
+    b = focgold_roll_d6();
+    c = focgold_roll_d6();
     expected_highest = a;
     if (b > expected_highest) {
         expected_highest = b;

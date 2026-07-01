@@ -1,6 +1,6 @@
 # Field Of Chaos Gold Rewrite Plan
 
-Current cycle: 20 / 40
+Current cycle: 26 / 40
 
 Source of truth: `pdf/foc-just-the-rules-gold.pdf`
 
@@ -34,6 +34,12 @@ Gold pivot note: Cycles 1-20 were completed against the pure 2018 just-the-rules
 - Throwing one grenade halves movement for the turn, rounded down.
 - A stationary character may throw two grenades; throwing two grenades consumes the turn and prevents movement, firearm attack, melee attack, reload, jam clearing, healing, and called-head-shot progress in that turn.
 - Gold excludes the 2024 use-based skill advancement table, Pharmaceutical Chemistry healing effect, ranged thresholds, SubMG rewrite, body-only wound pool, grave-condition PH roll, winded/chest-body rule, and removal of the 2018 called-head-shot procedure.
+
+## Gold Naming Decision
+
+Cycle 21 decision: active source files, public API symbols, library names, CLI names, tests, and Makefile outputs should migrate to Gold naming: `fieldofchaosgold` for file/library/CLI names and `focgold_` for public API symbols. The project should not retain `fieldofchaos2018` / `foc2018_` as active compatibility names unless a later cycle deliberately adds and tests a compatibility shim.
+
+`2018` remains valid only for retained reference PDFs, historical cycle notes, and explanatory text that identifies rules inherited from the 2018 core.
 
 ## Development Cycles
 
@@ -434,7 +440,7 @@ Create the Gold C command line program.
 
 Acceptance criteria:
 
-- `src/cli/fieldofchaosgold.c` exists, or the existing 2018-named CLI compatibility choice is documented before implementation.
+- `src/cli/fieldofchaosgold.c` exists.
 - CLI links against the static library.
 - CLI can print Gold rule tables.
 - CLI can run at least one deterministic attack example.
@@ -448,7 +454,7 @@ Create the final Makefile for the C static library, CLI, and tests.
 Acceptance criteria:
 
 - `make` builds the library and CLI.
-- `make lib` builds a Gold static library, preferably `build/libfieldofchaosgold.a`; any retained 2018-compatible library naming is documented.
+- `make lib` builds `build/libfieldofchaosgold.a`.
 - `make test` builds and runs the tests.
 - `make clean` removes build artifacts.
 - No Swift, Xcode, or Package.swift command is used.
@@ -488,7 +494,7 @@ Acceptance criteria:
 - No Swift source remains unless deliberately retained and documented.
 - No Xcode project remains.
 - No active doc says 2018-only or 2024-only rules are canonical.
-- No active source API names imply pure 2018-only or 2024 behavior unless the compatibility naming is explicitly documented.
+- No active source API, file, library, CLI, or Makefile output names use `2018` unless they are retained reference PDFs, historical notes, or deliberately documented compatibility shims.
 - The 2024 PDFs remain only as reference PDFs.
 
 ### Cycle 38 - Rewrite README
@@ -553,13 +559,19 @@ Acceptance criteria:
 - Cycle 19: Skill representation implemented from `pdf/foc-just-the-rules-2018.pdf`. Added stat and skill count sentinels, stat names, skill names, skill percentage validation, enum-based skill value lookup, skill-to-stat metadata, direct prerequisite arrays, and `foc2018_skill_improves_healing`. Represented Firearm Use Basic/Advanced, Close Combat, Improvised Weapon Use Basic, Clandestine Weapon Use Basic, First Aid, Paramedic, and the pharmaceutical chemistry chain. Pharmaceutical Chemistry is represented but does not improve 2018 healing. Added `src/tests/test_skills.c` for names, stats, prerequisites, percentage bounds, and healing relevance. Verified dice, stat, and skill tests with direct `cc` builds; `rg -n "advancement|experience|use-based|use based|XP" src/include src/lib` returned no matches.
 - Cycle 20: 2018 weapon metadata implemented from `pdf/foc-just-the-rules-2018.pdf`. Added a weapon count sentinel, `foc2018_weapon_name`, and `foc2018_parse_weapon` for Sniper Rifle, Rifle, Carbine, Automatic, and SubMG. Added `src/tests/test_weapons.c` to verify the five-weapon list, name parsing round-trips, invalid inputs, and rejection of Shotgun and Grenade as core 2018 weapons. Verified dice, stat, skill, and weapon tests with direct `cc` builds; `rg -n "foc2018_weapon_(shotgun|grenade)" src/include src/lib` returned no matches.
 - Gold pivot after Cycle 20: Created `pdf/foc-just-the-rules-gold.pdf` as the new source of truth. Gold keeps the 2018 core rules and adds agreed Shotgun and Grenade rules adapted from 2024: Shotgun is covered by Basic Firearm Use with a 15-inch cone and 5/10/15-inch damage bands; Grenade has 12-inch throw range, 1/3/4-inch radius bands, 3/6/9-inch building bands, 2d6 dud on 4 or less, Light cover debris, random 2018 hit-location wound allocation, friendly fire, and the grenade action-economy movement rule. Cycle 21 is reserved for auditing the remaining 2018 references and deciding Gold naming before code migration resumes in Cycle 22. Cycle 20 remains a historical completed cycle and will be superseded by upcoming Gold weapon work.
+- Cycle 21: 2018 reference audit completed. `git status --short` was clean at the start of the cycle. `rg --files` showed the active tree now consists of `PLAN.md`, `README.md`, retained PDFs, `LICENSE`, and the C source/test files under `src/`. The targeted scan `rg -n "2018|foc2018|fieldofchaos2018|libfieldofchaos2018|fieldofchaosgold|focgold|Makefile"` was reviewed; match counts were `src/include/fieldofchaos2018.h` 158, `src/lib/fieldofchaos2018.c` 125, `src/lib/fieldofchaos2018_internal.h` 4, `src/tests/test_skills.c` 65, `src/tests/test_stats.c` 36, `src/tests/test_weapons.c` 26, `src/tests/test_dice.c` 20, `PLAN.md` 81, `README.md` 4, and `pdf/foc-just-the-rules-2018.pdf` 1. Classification: retained reference PDF references are valid; Cycle 0-20 notes are historical; README and plan text that say Gold keeps the 2018 core are valid explanatory text; `src/include/fieldofchaos2018.h`, `src/lib/fieldofchaos2018.c`, `src/lib/fieldofchaos2018_internal.h`, and `foc2018_` symbols in tests are pre-pivot active names that must migrate to `fieldofchaosgold` / `focgold_`; `src/tests/test_weapons.c` currently asserts pure-2018 behavior by expecting five weapons and rejecting Shotgun/Grenade, and must be updated for Gold in Cycle 22. Naming decision recorded above: active source/API/library/CLI/Makefile/test names should migrate to Gold naming; `2018` should remain only for retained PDFs, historical notes, and explicit inherited-rule explanations. No rules implementation was changed in this cycle.
+- Cycle 22: Gold naming, weapon ranges, Shotgun/Grenade geometry, and ranged thresholds implemented. Renamed active C files and symbols from `fieldofchaos2018` / `foc2018_` to `fieldofchaosgold` / `focgold_`. Added Shotgun as a Gold firearm covered by Firearm Use, Basic, with 15-inch cone geometry and 5/10/15-inch damage bands of 2d6/d6/d3. Grenade is represented as a separate explosive action rather than a standard firearm range-band weapon, with 12-inch throw range, 1/3/4-inch open radii, 3/6/9-inch building radii, and d6/d3/d2 damage bands. Implemented 2018 inherited firearm range bands and hit/head-shot thresholds. Verified no active `foc2018`, `fieldofchaos2018`, or yard-based helper remains under `src/`.
+- Cycle 23: Gold ranged modifiers implemented. Light cover applies -1 die, Heavy cover applies -2 dice, Standard movement applies -1 die, Fast movement applies -2 dice, and target Evade applies -1 die. Grenade debris is modeled as Light cover for shots through the blast area; it upgrades no-cover shots to Light cover and does not stack beyond existing Heavy cover. Stacking behavior is covered in `src/tests/test_gold_actions.c`.
+- Cycle 24: Weapon fire rates, reload/jam metadata, and grenade reliability implemented. Standard clip size remains 10 rounds. Rifle and Carbine fire 2 shots with Firearm Advanced; Shotgun fires 1 cone attack; Automatic fires 2 shots and exposes a 2d6 jam roll with threshold 1; SubMG fires 3 shots and exposes a 1d6 jam roll with threshold 1. Automatic and SubMG cannot produce head shots. Changing a clip and clearing a jam each expose a 1-turn cost. Grenade reliability rolls 2d6 and is a dud on 4 or less; no skill modifies grenade reliability.
+- Cycle 25: Called head-shot setup metadata implemented. The API exposes the two-move setup requirement, readiness after two moves, and the rule that missed called head shots miss altogether.
+- Cycle 26: Gold movement and grenade action economy implemented. Movement paces are Very Slow 2 inches with +1 from Evade, Slow 3 inches with +1 from Marching, Standard 5 inches with +1 from Marching, and Fast 8 inches with +2 from Running. One disabled leg halves movement rounded down; two disabled legs prevent movement. Throwing one grenade halves movement rounded down. A stationary character can throw two grenades; the two-grenade turn permissions prevent movement, firearm attack, melee attack, reload, jam clearing, healing, and called-head-shot progress. Verified with direct `cc -std=c11 -Wall -Wextra -pedantic` builds and runs of `/tmp/focgold_test_dice`, `/tmp/focgold_test_stats`, `/tmp/focgold_test_skills`, `/tmp/focgold_test_weapons`, and `/tmp/focgold_test_gold_actions`.
 
 ## Classification Inventory
 
 | Path | Classification | Notes |
 |---|---|---|
 | `pdf/` | Keep | Contains the Gold source of truth plus retained 2018/2024 reference PDFs. |
-| `src/` | Gold pivot pending in code | Public header, deterministic dice/seeding, stat caps, stat generation, 2018 skill metadata, and 2018 weapon name parsing are implemented; Cycle 21 audits remaining 2018 references before Cycle 22 begins the Gold weapon/range migration. |
+| `src/` | Gold C source in progress | Public Gold header, deterministic dice/seeding, stat caps, stat generation, inherited 2018 skill metadata, Gold weapon/range geometry, ranged modifiers, fire-rate/jam metadata, called head-shot setup, movement, and grenade action economy are implemented. |
 | `docs/` | Removed | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; removed entirely in Cycle 13. |
 | `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
@@ -631,7 +643,7 @@ Acceptance criteria:
 
 - Character generation and validation currently use the old `foc_generate_stats` flow and a stat total cap of 40; regenerate from `pdf/foc-just-the-rules-gold.pdf`.
 - Wounds currently use head/body/arms/legs pools of `1/4/1/1/2/2`, body-zero unconsciousness, total-zero death, chest-wind checks, and grave-condition checks; verify all of this against the 2018 rules before reimplementing.
-- Weapons currently include none, sniper, rifle, SubMG, and shotgun with hard-coded yard ranges, clip counts, shotgun damage, SubMG jam behavior, armor saves, cover, evade, and running penalties; rebuild from the 2018 weapon and skill hierarchy.
+- Weapon/range mechanics were rebuilt in Cycles 22-24 from Gold: inherited 2018 firearm ranges plus agreed Shotgun and Grenade rules.
 - Healing currently uses item-like medical levels (`first_aid`, `paramedic`, `pharma`) and simple d6 thresholds; replace with the Gold medical skills and hierarchy, which keeps the 2018 no-Pharmaceutical-Chemistry-healing rule.
 - Playable-app systems currently include movement paces, targeting previews, board reload/attack/clear-jam/heal/grenade helpers, scenario generation, AI actions, campaign records, snapshots, event buffers, and JSON-lines event logs; omit unless they are explicitly part of the 2018 core rules library/CLI scope.
 
@@ -639,14 +651,15 @@ Acceptance criteria:
 
 | Path | Purpose |
 |---|---|
-| `src/include/fieldofchaos2018.h` | Current public API header created before the Gold pivot; Cycle 21 must decide whether to migrate this to Gold naming or explicitly keep it as a compatibility name. |
+| `src/include/fieldofchaosgold.h` | Public API header for the Gold static library. |
 | `src/include/` | Public headers for the Gold static library. |
-| `src/lib/fieldofchaos2018.c` | Current rules library implementation created before the Gold pivot; Cycle 21 must decide whether to migrate this to Gold naming or explicitly keep it as a compatibility name. |
-| `src/lib/fieldofchaos2018_internal.h` | Internal helpers for multi-die rolling. |
-| `src/lib/` | C implementation files for the Gold rules library once the Cycle 21 naming decision is applied. |
+| `src/lib/fieldofchaosgold.c` | Gold rules library implementation in progress. |
+| `src/lib/fieldofchaosgold_internal.h` | Internal helpers for multi-die rolling. |
+| `src/lib/` | C implementation files for the Gold rules library. |
 | `src/cli/` | C command-line program source. |
 | `src/tests/test_dice.c` | Focused dice/seeding tests until the full test suite and Makefile are created. |
 | `src/tests/test_stats.c` | Focused stats and character-generation tests until the full test suite and Makefile are created. |
 | `src/tests/test_skills.c` | Focused skill metadata and hierarchy tests until the full test suite and Makefile are created. |
-| `src/tests/test_weapons.c` | Focused 2018 weapon-list and name-parsing tests until the full test suite and Makefile are created. |
-| `src/tests/` | C test source for the 2018 rules library and CLI. |
+| `src/tests/test_weapons.c` | Focused Gold weapon, range, Shotgun, Grenade, fire-rate, jam, and reliability tests. |
+| `src/tests/test_gold_actions.c` | Focused Gold ranged modifier, called head-shot, movement, and grenade action-economy tests. |
+| `src/tests/` | C test source for the Gold rules library and CLI. |
