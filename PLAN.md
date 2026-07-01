@@ -1,6 +1,6 @@
 # Field Of Chaos 2018 Rewrite Plan
 
-Current cycle: 15 / 40
+Current cycle: 16 / 40
 
 Source of truth: `pdf/foc-just-the-rules-2018.pdf`
 
@@ -494,13 +494,14 @@ Acceptance criteria:
 - Cycle 13: Documentation directory cleaned. Removed `docs/` entirely because Cycle 12 found no minimal 2018-relevant traceability docs to keep. Updated `README.md` so it no longer references deleted docs or sample JSON files under `docs/`; examples now use `/tmp/foc-alice.json` and `/tmp/foc-bob.json`. Verified `docs/` no longer exists, active entry points no longer reference deleted docs, and no retained documentation contradicts `pdf/foc-just-the-rules-2018.pdf` as source of truth.
 - Cycle 14: Old `src/` frozen for rewrite. Reviewed the existing C header, implementation, CLIs, tests, Makefile, Swift module map, and build outputs. Current source is a 2024/playable-app prototype with JSON character persistence, event logs, snapshots, event buffers, board helpers, movement paces, targeting previews, scenario generation, AI actions, campaign advancement, grenades, healing, and Swift bridge support. The old source layout is marked remove-and-recreate inside `src/` during Cycle 15; no current file should be carried forward as-is. No 2018 code was added in this cycle.
 - Cycle 15: Final C source layout defined. Removed the old `src/` tree and recreated only `src/include/`, `src/lib/`, `src/cli/`, and `src/tests/`, each with a `.gitkeep` placeholder so the skeleton can be committed before implementation files are added. Verified the old Swift `module.modulemap` is gone and `src/.DS_Store` is absent. Updated `README.md` to stop documenting deleted prototype source files and commands. No 2018 rules implementation was added in this cycle.
+- Cycle 16: Public 2018 header created. Added `src/include/fieldofchaos2018.h` and removed the `src/include/.gitkeep` placeholder. The header uses `foc2018_` public names and defines 2018 stats, skills, weapons, range bands, movement paces, wounds, hit locations, characters, attack results, melee results, and healing results. It models the 2018 weapon list as Sniper Rifle, Rifle, Carbine, Automatic, and SubMG; wound pools as head, chest, abdomen, arms, and legs; movement in inches; and healing as no skill, bandage, First Aid, and Paramedic. Verified with `cc -std=c11 -Wall -Wextra -pedantic -fsyntax-only` and checked that stale 2024/app terms such as shotgun, grenade, yards, body-only wounds, JSON, events, buffers, scenarios, campaign, Swift, and Xcode are absent from the header.
 
 ## Classification Inventory
 
 | Path | Classification | Notes |
 |---|---|---|
 | `pdf/` | Keep | Contains the 2018 source of truth and retained 2024/reference PDFs. |
-| `src/` | Skeleton created | Final C-only layout now has `include/`, `lib/`, `cli/`, and `tests/`; implementation begins in Cycle 16. |
+| `src/` | Header started | Final C-only layout now has `include/`, `lib/`, `cli/`, and `tests/`; public header was created in Cycle 16 and implementation continues in Cycle 17. |
 | `docs/` | Removed | Cycle 12 found only 2024 extraction/prototype and retired playable-app docs; removed entirely in Cycle 13. |
 | `scripts/` | Removed | Cycle 10 found only Swift/Xcode/app scripts; removed entirely in Cycle 11. Recreate any future C/PDF helper deliberately later. |
 | `AppShell/` | Remove | SwiftUI/Metal app source, outside C-only 2018 scope. |
@@ -580,6 +581,7 @@ Acceptance criteria:
 
 | Path | Purpose |
 |---|---|
+| `src/include/fieldofchaos2018.h` | Public API header for the 2018 static library. |
 | `src/include/` | Public headers for the 2018 static library. |
 | `src/lib/` | C implementation files for the 2018 rules library. |
 | `src/cli/` | C command-line program source. |
