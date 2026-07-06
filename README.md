@@ -8,7 +8,19 @@
 
 The source of truth is `pdf/foc-just-the-rules-gold.pdf`.
 
-Gold keeps the 2018 core rules and adds the agreed Shotgun and Grenade rules adapted from the newer rule set. The retained PDFs below are reference-only:
+Gold keeps the 2018 core rules and adds the agreed Shotgun and Grenade rules adapted from the newer rule set. The Chechnya PDFs show a setting-specific First Chechen War skirmish game built on Gold, including optional edge-case machine gun handling.
+
+## PDF Downloads
+
+- [Field of Chaos Gold: Just The Rules](pdf/foc-just-the-rules-gold.pdf)
+- [First Chechen War Skirmish Game: Chechnya Gold Rulebook](pdf/foc-chechnya-gold.pdf)
+- [First Chechen War Skirmish Game: Historical Reference](pdf/foc-chechnya-gold-reference.pdf)
+- [Field of Chaos 2018: Just The Rules](pdf/foc-just-the-rules-2018.pdf)
+- [Field of Chaos 2024: Just The Rules](pdf/foc-just-the-rules-2024.pdf)
+- [Field of Chaos 2018 RPG](pdf/foc_rpg_051018.pdf)
+- [Field of Chaos 2024 RPG](pdf/field-of-chaos-rpg-070524.pdf)
+
+The retained non-Gold PDFs below are reference-only:
 
 - `pdf/foc-just-the-rules-2018.pdf`
 - `pdf/foc-just-the-rules-2024.pdf`
@@ -87,6 +99,24 @@ The README mirrors the executable rule content in `pdf/foc-just-the-rules-gold.p
 - Target Evade subtracts 1 die. Grenade debris counts as light cover.
 - Standard clips hold 10 rounds. Reloading takes one turn. Clearing a jam takes one turn.
 - Called head shots require two setup moves before firing and miss entirely if the called shot misses.
+
+### Machine Gun Edge Rule Candidate
+
+`pdf/foc-chechnya-gold.pdf` treats RPK/RPK-74 and PK/PKM as hard edge cases rather than normal Gold weapons. The rule can be made generic for Field of Chaos Gold as an optional scenario module because it is about permission, field of fire, ammunition, and scenario pressure rather than Chechnya-specific weapon values.
+
+Generic machine gun handling:
+
+- Default: leave machine guns out of normal rosters.
+- Permission: use only when the scenario is built around the gun and both players know it bends the small-arms scale.
+- Weapon types: RPK/RPK-74 is a scenario-only light machine gun edge case; PK/PKM is a rarer medium machine gun hazard, usually fixed, crewed, or off-table.
+- Arc: declare the fire arc before play; no free 360-degree dominance.
+- Ammo: use cache or ammunition markers; running dry matters.
+- Movement: Very Slow for a portable edge case, or fixed by scenario.
+- Pressure: every burst can advance a pressure clock or equivalent scenario cost.
+- Capture: treat the gun as an objective marker or hazard, not a permanent roster purchase.
+- Table design: terrain must give bypass routes, and a non-shooting objective must still be able to win.
+
+This machine gun edge rule is documented here from the Chechnya rulebook and is suitable to migrate into the Gold rules. It is not yet represented in `pdf/foc-just-the-rules-gold.pdf`, `src/include/fieldofchaosgold.h`, or the C static library until a dedicated migration updates the PDF, API, CLI output, tests, and `TRACEABILITY.md`.
 
 ### Shotgun
 
